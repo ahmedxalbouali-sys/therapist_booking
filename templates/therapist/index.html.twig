@@ -27,7 +27,10 @@
                 <td>{{ therapist.email }}</td>
                 <td>{{ therapist.phone }}</td>
                 <td>{{ therapist.description }}</td>
-                <td>{{ therapist.photo }}</td>
+                <td>{% if therapist.photo %}
+    <img src="{{ asset('uploads/therapists/' ~ therapist.photo) }}" alt="{{ therapist.name }}" style="max-width:200px;">
+{% endif %}
+</td>
                 <td>
                     <a href="{{ path('app_therapist_show', {'id': therapist.id}) }}">show</a>
                     <a href="{{ path('app_therapist_edit', {'id': therapist.id}) }}">edit</a>

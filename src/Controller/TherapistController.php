@@ -10,11 +10,22 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+
 
 #[Route('/therapist')]
 #[IsGranted('ROLE_ADMIN')]
 final class TherapistController extends AbstractController
 {
+    private SluggerInterface $slugger;
+
+    public function __construct(SluggerInterface $slugger)
+    {
+        $this->slugger = $slugger;
+    }
+
     #[Route(name: 'app_therapist_index', methods: ['GET'])]
     public function index(TherapistRepository $therapistRepository): Response
     {
@@ -31,6 +42,26 @@ final class TherapistController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle photo upload
+            $photoFile = $form->get('photo')->getData();
+            if ($photoFile) {
+                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $this->slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$photoFile->guessExtension();
+
+                try {
+                    $photoFile->move(
+                        $this->getParameter('therapist_photos_dir'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    // Handle upload error
+                    $this->addFlash('error', 'Failed to upload image.');
+                }
+
+                $therapist->setPhoto($newFilename);
+            }
+
             $entityManager->persist($therapist);
             $entityManager->flush();
 
@@ -58,6 +89,25 @@ final class TherapistController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle photo upload
+            $photoFile = $form->get('photo')->getData();
+            if ($photoFile) {
+                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $this->slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$photoFile->guessExtension();
+
+                try {
+                    $photoFile->move(
+                        $this->getParameter('therapist_photos_dir'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Failed to upload image.');
+                }
+
+                $therapist->setPhoto($newFilename);
+            }
+
             $entityManager->flush();
 
             return $this->redirectToRoute('app_therapist_index', [], Response::HTTP_SEE_OTHER);
@@ -72,7 +122,7 @@ final class TherapistController extends AbstractController
     #[Route('/{id}', name: 'app_therapist_delete', methods: ['POST'])]
     public function delete(Request $request, Therapist $therapist, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$therapist->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$therapist->getId(), $request->request->get('_token'))) {
             $entityManager->remove($therapist);
             $entityManager->flush();
         }

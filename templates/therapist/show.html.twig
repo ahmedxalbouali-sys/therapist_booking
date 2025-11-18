@@ -33,7 +33,10 @@
             </tr>
             <tr>
                 <th>Photo</th>
-                <td>{{ therapist.photo }}</td>
+                <td>{% if therapist.photo %}
+    <img src="{{ asset('uploads/therapists/' ~ therapist.photo) }}" alt="{{ therapist.name }}" style="max-width:200px;">
+{% endif %}
+</td>
             </tr>
         </tbody>
     </table>
