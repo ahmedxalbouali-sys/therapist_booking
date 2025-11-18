@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Therapist index{% endblock %}
+
+{% block body %}
+    <h1>Therapist index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Specialization</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Description</th>
+                <th>Photo</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for therapist in therapists %}
+            <tr>
+                <td>{{ therapist.id }}</td>
+                <td>{{ therapist.name }}</td>
+                <td>{{ therapist.specialization }}</td>
+                <td>{{ therapist.email }}</td>
+                <td>{{ therapist.phone }}</td>
+                <td>{{ therapist.description }}</td>
+                <td>{{ therapist.photo }}</td>
+                <td>
+                    <a href="{{ path('app_therapist_show', {'id': therapist.id}) }}">show</a>
+                    <a href="{{ path('app_therapist_edit', {'id': therapist.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_therapist_new') }}">Create new</a>
+{% endblock %}
