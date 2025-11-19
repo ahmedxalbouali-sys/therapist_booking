@@ -46,10 +46,26 @@ class Appointment
         return $this;
     }
 
-    public function getStatus(): ?string
+
+
+
+    public function getStatus(): string
     {
-        return $this->status;
+        $now = new \DateTime();
+
+        if ($this->startAt > $now) {
+            return 'Free';
+        }
+
+        $endAt = (clone $this->startAt)->modify('+1 hour'); // 1-hour sessions
+        if ($now >= $this->startAt && $now < $endAt) {
+            return 'In progress';
+        }
+
+        return 'Done';
     }
+
+
 
 
     public function updateStatus(): void
@@ -103,6 +119,10 @@ class Appointment
     {
         return $this->therapist;
     }
+
+
+
+    
 
     public function setTherapist(?Therapist $therapist): static
     {

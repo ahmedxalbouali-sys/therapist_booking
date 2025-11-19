@@ -15,15 +15,35 @@ use Symfony\Component\Routing\Attribute\Route;
 #[IsGranted('ROLE_ADMIN')] // ensure only admins can access this controller
 final class AdminAppointmentController extends AbstractController
 {
-    // Show all appointments
-    #[Route(name: 'admin_appointment_index', methods: ['GET'])]
-    public function index(AppointmentRepository $appointmentRepository): Response
-    {
-        // Admin sees ALL appointments
-        return $this->render('admin_appointment/index.html.twig', [
-            'appointments' => $appointmentRepository->findAll(),
-        ]);
+#[Route(name: 'admin_appointment_index', methods: ['GET'])]
+public function index(Request $request, AppointmentRepository $appointmentRepository): Response
+{
+    $qb = $appointmentRepository->createQueryBuilder('a')
+        ->join('a.client', 'c')
+        ->join('a.therapist', 't');
+
+    if ($clientName = $request->query->get('client')) {
+        $qb->andWhere('c.firstName LIKE :client OR c.lastName LIKE :client')
+           ->setParameter('client', '%'.$clientName.'%');
     }
+
+    if ($therapistName = $request->query->get('therapist')) {
+        $qb->andWhere('t.name LIKE :therapist')
+           ->setParameter('therapist', '%'.$therapistName.'%');
+    }
+
+    if ($date = $request->query->get('date')) {
+        $qb->andWhere('DATE(a.startAt) = :date')
+           ->setParameter('date', $date);
+    }
+
+    $appointments = $qb->getQuery()->getResult();
+
+    return $this->render('admin_appointment/index.html.twig', [
+        'appointments' => $appointments,
+    ]);
+}
+
 
     // Show one appointment (admin)
     #[Route('/{id}', name: 'admin_appointment_show', methods: ['GET'])]
