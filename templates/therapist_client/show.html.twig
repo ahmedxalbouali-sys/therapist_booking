@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Therapist Details{% endblock %}
+
+{% block body %}
+<h1>{{ therapist.name }}</h1>
+<p><strong>Specialization:</strong> {{ therapist.specialization }}</p>
+<p><strong>Email:</strong> {{ therapist.email }}</p>
+<p><strong>Phone:</strong> {{ therapist.phone }}</p>
+<p><strong>Description:</strong> {{ therapist.description }}</p>
+{% if therapist.photo %}
+    <img src="{{ asset('uploads/therapists/' ~ therapist.photo) }}" style="max-width:200px;">
+{% endif %}
+
+<a href="{{ path('client_therapist_index') }}">Back to list</a>
+{% endblock %}

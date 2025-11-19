@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Therapists{% endblock %}
+
+{% block body %}
+<h1>Therapists</h1>
+
+<form method="get" action="{{ path('client_therapist_index') }}">
+    <input type="text" name="name" placeholder="Name" value="{{ search_name }}">
+    <input type="text" name="specialization" placeholder="Specialization" value="{{ search_specialization }}">
+    <button type="submit">Search</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Specialization</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Description</th>
+            <th>Photo</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for therapist in therapists %}
+        <tr>
+            <td>{{ therapist.name }}</td>
+            <td>{{ therapist.specialization }}</td>
+            <td>{{ therapist.email }}</td>
+            <td>{{ therapist.phone }}</td>
+            <td>{{ therapist.description }}</td>
+            <td>
+                {% if therapist.photo %}
+                    <img src="{{ asset('uploads/therapists/' ~ therapist.photo) }}" style="max-width:100px;">
+                {% endif %}
+            </td>
+            <td><a href="{{ path('client_therapist_show', {'id': therapist.id}) }}">View</a></td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="7">No therapists found</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
