@@ -5,35 +5,83 @@ namespace App\Controller;
 use App\Entity\Appointment;
 use App\Form\AppointmentType;
 use App\Repository\AppointmentRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/appointment')]
 #[IsGranted('ROLE_USER')]
 final class AppointmentController extends AbstractController
 {
+    private function updateAppointmentStatus(Appointment $appointment): void
+    {
+        $now = new \DateTime();
+        $endAt = clone $appointment->getStartAt();
+        $endAt->modify('+1 hour');
+
+        if ($now < $appointment->getStartAt()) {
+            $appointment->setStatus('scheduled');
+        } elseif ($now >= $appointment->getStartAt() && $now < $endAt) {
+            $appointment->setStatus('in_progress');
+        } else {
+            $appointment->setStatus('completed');
+        }
+    }
+
     #[Route(name: 'app_appointment_index', methods: ['GET'])]
     public function index(AppointmentRepository $appointmentRepository): Response
-    {
+    {   
+        $user = $this->getUser(); // current logged-in client
+        $appointments = $appointmentRepository->findBy(['client' => $user]);
+
+        // Update status before rendering
+        foreach ($appointments as $appointment) {
+            $this->updateAppointmentStatus($appointment);
+        }
+
         return $this->render('appointment/index.html.twig', [
-            'appointments' => $appointmentRepository->findAll(),
+            'appointments' => $appointments,
         ]);
     }
 
     #[Route('/new', name: 'app_appointment_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        AppointmentRepository $appointmentRepository
+    ): Response
     {
         $appointment = new Appointment();
+        $appointment->setClient($this->getUser()); // assign logged-in user automatically
+
         $form = $this->createForm(AppointmentType::class, $appointment);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            // Check for overlapping appointment (1-hour slots) for the therapist
+            $existing = $appointmentRepository->createQueryBuilder('a')
+                ->where('a.therapist = :therapist')
+                ->andWhere('a.startAt BETWEEN :start AND :end')
+                ->setParameter('therapist', $appointment->getTherapist())
+                ->setParameter('start', $appointment->getStartAt())
+                ->setParameter('end', (clone $appointment->getStartAt())->modify('+1 hour'))
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if ($existing) {
+                $this->addFlash('error', 'This time slot is already taken for the selected therapist.');
+                return $this->redirectToRoute('app_appointment_new');
+            }
+
             $entityManager->persist($appointment);
             $entityManager->flush();
 
+            $this->addFlash('success', 'Your appointment has been booked successfully.');
             return $this->redirectToRoute('app_appointment_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -46,20 +94,36 @@ final class AppointmentController extends AbstractController
     #[Route('/{id}', name: 'app_appointment_show', methods: ['GET'])]
     public function show(Appointment $appointment): Response
     {
+        // Ensure only owner or admin can view
+        $user = $this->getUser();
+        if (!in_array('ROLE_ADMIN', $user->getRoles()) && $appointment->getClient() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $this->updateAppointmentStatus($appointment);
+
         return $this->render('appointment/show.html.twig', [
             'appointment' => $appointment,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'app_appointment_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Appointment $appointment, EntityManagerInterface $entityManager): Response
+    public function edit(
+        Request $request,
+        Appointment $appointment,
+        EntityManagerInterface $entityManager,
+        UserRepository $userRepository
+    ): Response
     {
-        $form = $this->createForm(AppointmentType::class, $appointment);
+        $user = $this->getUser();
+
+        $form = $this->createForm(AppointmentType::class, $appointment, ['is_admin' => true]);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
+            $this->addFlash('success', 'Appointment updated successfully.');
             return $this->redirectToRoute('app_appointment_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -72,9 +136,17 @@ final class AppointmentController extends AbstractController
     #[Route('/{id}', name: 'app_appointment_delete', methods: ['POST'])]
     public function delete(Request $request, Appointment $appointment, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$appointment->getId(), $request->getPayload()->getString('_token'))) {
+        $user = $this->getUser();
+
+        // Only admin or owner can delete
+        if (!in_array('ROLE_ADMIN', $user->getRoles()) && $appointment->getClient() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($this->isCsrfTokenValid('delete'.$appointment->getId(), $request->request->get('_token'))) {
             $entityManager->remove($appointment);
             $entityManager->flush();
+            $this->addFlash('success', 'Appointment deleted successfully.');
         }
 
         return $this->redirectToRoute('app_appointment_index', [], Response::HTTP_SEE_OTHER);

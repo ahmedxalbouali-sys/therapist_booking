@@ -43,8 +43,8 @@ security:
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/therapist, roles: ROLE_ADMIN }
+        - { path: ^/admin/appointments, roles: ROLE_ADMIN }
         
-        - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/appointment, roles: ROLE_USER }
         
         # - { path: ^/admin, roles: ROLE_ADMIN }

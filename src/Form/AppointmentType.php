@@ -22,25 +22,15 @@ class AppointmentType extends AbstractType
                 'widget' => 'single_text',
             ])
 
-            ->add('status', ChoiceType::class, [
-                'choices' => [
-                    'Pending' => 'pending',
-                    'Confirmed' => 'confirmed',
-                    'Cancelled' => 'cancelled',
-                ],
-            ])
-
             ->add('notes', TextareaType::class, [
                 'required' => false,
             ])
 
             ->add('client', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => function(User $u) {
-    return $u->getFirstName() . ' ' . $u->getLastName();
-}
-
-            ])
+    'class' => User::class,
+    'choice_label' => fn(User $u) => $u->getFirstName() . ' ' . $u->getLastName(),
+    'disabled' => !$options['is_admin'], // only editable if admin
+])
 
             ->add('therapist', EntityType::class, [
                 'class' => Therapist::class,
@@ -52,6 +42,7 @@ class AppointmentType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Appointment::class,
+            'is_admin' => false, // default false
         ]);
     }
 }

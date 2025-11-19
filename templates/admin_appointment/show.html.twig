@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Appointment Details{% endblock %}
+
+{% block body %}
+<h1>Appointment Details</h1>
+
+<ul>
+    <li>ID: {{ appointment.id }}</li>
+    <li>Client: {{ appointment.client.firstName }} {{ appointment.client.lastName }}</li>
+    <li>Therapist: {{ appointment.therapist.name }}</li>
+    <li>Start Time: {{ appointment.startAt|date('Y-m-d H:i') }}</li>
+    <li>Status: {{ appointment.status }}</li>
+    <li>Notes: {{ appointment.notes }}</li>
+</ul>
+
+<a href="{{ path('admin_appointment_edit', {'id': appointment.id}) }}" class="btn btn-primary">Edit</a>
+<a href="{{ path('admin_appointment_index') }}" class="btn btn-secondary">Back to list</a>
+{% endblock %}

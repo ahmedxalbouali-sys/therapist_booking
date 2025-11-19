@@ -18,7 +18,7 @@ class Appointment
     private ?\DateTime $startAt = null;
 
     #[ORM\Column(length: 50)]
-    private ?string $status = null;
+    private ?string $status = 'scheduled';
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
@@ -50,6 +50,23 @@ class Appointment
     {
         return $this->status;
     }
+
+
+    public function updateStatus(): void
+    {
+        $now = new \DateTime();
+        $endAt = clone $this->startAt;
+        $endAt->modify('+1 hour');
+
+        if ($now < $this->startAt) {
+            $this->status = 'scheduled';
+        } elseif ($now >= $this->startAt && $now < $endAt) {
+            $this->status = 'in_progress';
+        } else {
+            $this->status = 'completed';
+        }
+    }      
+
 
     public function setStatus(string $status): static
     {
