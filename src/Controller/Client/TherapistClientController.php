@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Client;
 
 use App\Repository\TherapistRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -9,11 +9,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
-#[Route('/therapists')]
+#[Route('/therapists', name: 'client_therapist_')]
 #[IsGranted('ROLE_USER')]
 class TherapistClientController extends AbstractController
 {
-    #[Route('/', name: 'client_therapist_index', methods: ['GET'])]
+    #[Route('/', name: 'index', methods: ['GET'])]
     public function index(Request $request, TherapistRepository $therapistRepository): Response
     {
         $searchName = $request->query->get('name', '');
@@ -33,15 +33,15 @@ class TherapistClientController extends AbstractController
 
         $therapists = $queryBuilder->getQuery()->getResult();
 
-        return $this->render('therapist_client/index.html.twig', [
+        return $this->render('client/therapist/index.html.twig', [
             'therapists' => $therapists,
             'search_name' => $searchName,
             'search_specialization' => $searchSpecialization,
         ]);
     }
 
-    #[Route('/{id}', name: 'client_therapist_show', methods: ['GET'])]
-    public function show($id, TherapistRepository $therapistRepository): Response
+    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    public function show(int $id, TherapistRepository $therapistRepository): Response
     {
         $therapist = $therapistRepository->find($id);
 
@@ -49,7 +49,7 @@ class TherapistClientController extends AbstractController
             throw $this->createNotFoundException('Therapist not found');
         }
 
-        return $this->render('therapist_client/show.html.twig', [
+        return $this->render('client/therapist/show.html.twig', [
             'therapist' => $therapist,
         ]);
     }

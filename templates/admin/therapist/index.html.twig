@@ -32,8 +32,8 @@
 {% endif %}
 </td>
                 <td>
-                    <a href="{{ path('app_therapist_show', {'id': therapist.id}) }}">show</a>
-                    <a href="{{ path('app_therapist_edit', {'id': therapist.id}) }}">edit</a>
+                    <a href="{{ path('admin_therapist_show', {'id': therapist.id}) }}">show</a>
+                    <a href="{{ path('admin_therapist_edit', {'id': therapist.id}) }}">edit</a>
                 </td>
             </tr>
         {% else %}
@@ -44,5 +44,5 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_therapist_new') }}">Create new</a>
+    <a href="{{ path('admin_therapist_new') }}">Create new</a>
 {% endblock %}

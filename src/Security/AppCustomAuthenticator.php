@@ -27,20 +27,22 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
     }
 
     public function authenticate(Request $request): Passport
-    {
-        $email = $request->getPayload()->getString('email');
+{
+    $email = $request->request->get('email');
+    $password = $request->request->get('password');
 
-        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
+    $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
 
-        return new Passport(
-            new UserBadge($email),
-            new PasswordCredentials($request->getPayload()->getString('password')),
-            [
-                new CsrfTokenBadge('authenticate', $request->getPayload()->getString('_csrf_token')),
-                new RememberMeBadge(),
-            ]
-        );
-    }
+    return new Passport(
+        new UserBadge($email),
+        new PasswordCredentials($password),
+        [
+            new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
+            new RememberMeBadge(),
+        ]
+    );
+}
+
 
 public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
 {
@@ -54,11 +56,11 @@ public function onAuthenticationSuccess(Request $request, TokenInterface $token,
 
     // If admin → redirect to admin dashboard
     if (in_array('ROLE_ADMIN', $user->getRoles())) {
-        return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
+        return new RedirectResponse($this->urlGenerator->generate('app_admin'));
     }
 
     // If normal user → redirect to homepage
-    return new RedirectResponse($this->urlGenerator->generate('home'));
+    return new RedirectResponse($this->urlGenerator->generate('app_home'));
 }
 
 

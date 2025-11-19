@@ -58,23 +58,28 @@ final class AppointmentController extends AbstractController
         $appointment = new Appointment();
         $appointment->setClient($this->getUser()); // assign logged-in user automatically
 
-        $form = $this->createForm(AppointmentType::class, $appointment);
+        $form = $this->createForm(AppointmentType::class, $appointment, [
+            'is_admin' => false,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
             // Check for overlapping appointment (1-hour slots) for the therapist
+            $appointmentEnd = (clone $appointment->getStartAt())->modify('+1 hour');
+
             $existing = $appointmentRepository->createQueryBuilder('a')
                 ->where('a.therapist = :therapist')
-                ->andWhere('a.startAt BETWEEN :start AND :end')
+                ->andWhere('a.startAt < :newEnd')
+                ->andWhere('DATE_ADD(a.startAt, 1, \'hour\') > :newStart')
                 ->setParameter('therapist', $appointment->getTherapist())
-                ->setParameter('start', $appointment->getStartAt())
-                ->setParameter('end', (clone $appointment->getStartAt())->modify('+1 hour'))
+                ->setParameter('newStart', $appointment->getStartAt())
+                ->setParameter('newEnd', $appointmentEnd)
                 ->getQuery()
                 ->getOneOrNullResult();
 
             if ($existing) {
-                $this->addFlash('error', 'This time slot is already taken for the selected therapist.');
+                $this->addFlash('error', 'This therapist is already booked at this time. Please choose another slot.');
                 return $this->redirectToRoute('app_appointment_new');
             }
 
@@ -112,16 +117,44 @@ final class AppointmentController extends AbstractController
         Request $request,
         Appointment $appointment,
         EntityManagerInterface $entityManager,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        AppointmentRepository $appointmentRepository // added repository for overlap check
     ): Response
     {
         $user = $this->getUser();
 
-        $form = $this->createForm(AppointmentType::class, $appointment, ['is_admin' => true]);
+        if (!in_array('ROLE_ADMIN', $user->getRoles()) && $appointment->getClient() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $form = $this->createForm(AppointmentType::class, $appointment, [
+            'is_admin' => in_array('ROLE_ADMIN', $user->getRoles()),
+        ]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            // Check for overlapping appointment (1-hour slots) for the therapist
+            $appointmentEnd = (clone $appointment->getStartAt())->modify('+1 hour');
+
+            $existing = $appointmentRepository->createQueryBuilder('a')
+                ->where('a.therapist = :therapist')
+                ->andWhere('a.id != :id')
+                ->andWhere('a.startAt < :newEnd')
+                ->andWhere('DATE_ADD(a.startAt, 1, \'hour\') > :newStart')
+                ->setParameter('therapist', $appointment->getTherapist())
+                ->setParameter('newStart', $appointment->getStartAt())
+                ->setParameter('newEnd', $appointmentEnd)
+                ->setParameter('id', $appointment->getId())
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if ($existing) {
+                $this->addFlash('error', 'This therapist is already booked at this time. Please choose another slot.');
+                return $this->redirectToRoute('app_appointment_edit', ['id' => $appointment->getId()]);
+            }
+
             $entityManager->flush();
             $this->addFlash('success', 'Appointment updated successfully.');
             return $this->redirectToRoute('app_appointment_index', [], Response::HTTP_SEE_OTHER);
