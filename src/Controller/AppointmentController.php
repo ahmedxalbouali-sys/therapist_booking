@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/appointment')]
+#[IsGranted('ROLE_USER')]
 final class AppointmentController extends AbstractController
 {
     #[Route(name: 'app_appointment_index', methods: ['GET'])]
