@@ -38,14 +38,14 @@ class AppointmentType extends AbstractType
                 'class' => User::class,
                 'choice_label' => fn(User $u) => $u->getFirstName() . ' ' . $u->getLastName(),
                 'disabled' => !$options['is_admin'],
+                'data' => $options['current_user'] ?? null, // auto-select current user for clients
             ])
             ->add('therapist', EntityType::class, [
                 'class' => Therapist::class,
                 'choice_label' => 'name',
             ]);
 
-        //
-        //
+        // Event listener for dynamic therapist availability
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
             $form = $event->getForm();
             $appointment = $event->getData();
@@ -55,25 +55,27 @@ class AppointmentType extends AbstractType
             }
 
             $startAt = $appointment->getStartAt();
+            $currentId = $appointment->getId();
 
             // Admin sees all therapists → no restriction
             if ($options['is_admin'] || !$startAt) {
-                return; // keep default field
+                return;
             }
-            // User → show only available therapists at selected time
 
+            // Client → show only available therapists
             $form->add('therapist', EntityType::class, [
                 'class' => Therapist::class,
                 'choice_label' => 'name',
-                'query_builder' => function (TherapistRepository $repo) use ($startAt) {
+                'query_builder' => function (TherapistRepository $repo) use ($startAt, $currentId) {
                     $qb = $repo->createQueryBuilder('t');
 
                     $qb->leftJoin('t.appointments', 'ap')
-                        ->andWhere('ap.id IS NULL OR NOT (ap.startAt < :newEnd AND DATE_ADD(ap.startAt, 1, \'hour\') > :newStart)')
+                        ->andWhere('ap.id IS NULL OR ap.id = :currentId OR NOT (ap.startAt < :newEnd AND DATE_ADD(ap.startAt, 1, \'hour\') > :newStart)')
                         ->setParameter('newStart', $startAt)
-                        ->setParameter('newEnd', (clone $startAt)->modify('+1 hour'));
+                        ->setParameter('newEnd', (clone $startAt)->modify('+1 hour'))
+                        ->setParameter('currentId', $currentId ?: 0);
 
-                    return $qb; // ✔ MUST return QueryBuilder
+                    return $qb;
                 },
             ]);
         });
@@ -84,6 +86,7 @@ class AppointmentType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Appointment::class,
             'is_admin' => false,
+            'current_user' => null, // pass current user for client pages
         ]);
     }
 }

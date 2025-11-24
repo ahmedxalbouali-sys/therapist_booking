@@ -35,10 +35,9 @@ final class AppointmentController extends AbstractController
     #[Route(name: 'app_appointment_index', methods: ['GET'])]
     public function index(AppointmentRepository $appointmentRepository): Response
     {   
-        $user = $this->getUser(); // current logged-in client
+        $user = $this->getUser();
         $appointments = $appointmentRepository->findBy(['client' => $user]);
 
-        // Update status before rendering
         foreach ($appointments as $appointment) {
             $this->updateAppointmentStatus($appointment);
         }
@@ -47,25 +46,36 @@ final class AppointmentController extends AbstractController
             'appointments' => $appointments,
         ]);
     }
+    #[Route('/{id}/show', name: 'app_appointment_show', methods: ['GET'])]
+public function show(Appointment $appointment): Response
+{
+    $user = $this->getUser();
+    if ($appointment->getClient() !== $user) {
+        throw $this->createAccessDeniedException();
+    }
+
+    $this->updateAppointmentStatus($appointment);
+
+    return $this->render('appointment/show.html.twig', [
+        'appointment' => $appointment,
+    ]);
+}
 
     #[Route('/new', name: 'app_appointment_new', methods: ['GET', 'POST'])]
-    public function new(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        AppointmentRepository $appointmentRepository
-    ): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, AppointmentRepository $appointmentRepository): Response
     {
         $appointment = new Appointment();
-        $appointment->setClient($this->getUser()); // assign logged-in user automatically
+        $appointment->setClient($this->getUser());
 
         $form = $this->createForm(AppointmentType::class, $appointment, [
             'is_admin' => false,
+            'current_user' => $this->getUser(),
         ]);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            // Check for overlapping appointment (1-hour slots) for the therapist
             $appointmentEnd = (clone $appointment->getStartAt())->modify('+1 hour');
 
             $existing = $appointmentRepository->createQueryBuilder('a')
@@ -96,46 +106,23 @@ final class AppointmentController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_appointment_show', methods: ['GET'])]
-    public function show(Appointment $appointment): Response
-    {
-        // Ensure only owner or admin can view
-        $user = $this->getUser();
-        if (!in_array('ROLE_ADMIN', $user->getRoles()) && $appointment->getClient() !== $user) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $this->updateAppointmentStatus($appointment);
-
-        return $this->render('appointment/show.html.twig', [
-            'appointment' => $appointment,
-        ]);
-    }
-
     #[Route('/{id}/edit', name: 'app_appointment_edit', methods: ['GET', 'POST'])]
-    public function edit(
-        Request $request,
-        Appointment $appointment,
-        EntityManagerInterface $entityManager,
-        UserRepository $userRepository,
-        AppointmentRepository $appointmentRepository // added repository for overlap check
-    ): Response
+    public function edit(Request $request, Appointment $appointment, EntityManagerInterface $entityManager, AppointmentRepository $appointmentRepository): Response
     {
         $user = $this->getUser();
-
-        if (!in_array('ROLE_ADMIN', $user->getRoles()) && $appointment->getClient() !== $user) {
+        if ($appointment->getClient() !== $user) {
             throw $this->createAccessDeniedException();
         }
 
         $form = $this->createForm(AppointmentType::class, $appointment, [
-            'is_admin' => in_array('ROLE_ADMIN', $user->getRoles()),
+            'is_admin' => false,
+            'current_user' => $this->getUser(),
         ]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            // Check for overlapping appointment (1-hour slots) for the therapist
             $appointmentEnd = (clone $appointment->getStartAt())->modify('+1 hour');
 
             $existing = $appointmentRepository->createQueryBuilder('a')
@@ -170,9 +157,7 @@ final class AppointmentController extends AbstractController
     public function delete(Request $request, Appointment $appointment, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
-
-        // Only admin or owner can delete
-        if (!in_array('ROLE_ADMIN', $user->getRoles()) && $appointment->getClient() !== $user) {
+        if ($appointment->getClient() !== $user) {
             throw $this->createAccessDeniedException();
         }
 

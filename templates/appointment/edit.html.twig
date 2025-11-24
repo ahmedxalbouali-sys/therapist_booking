@@ -5,6 +5,15 @@
 {% block body %}
     <h1>Edit Appointment</h1>
 
+    {# Display flash messages for errors or success #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
     {{ include('appointment/_form.html.twig', {'button_label': 'Update'}) }}
 
     <a href="{{ path('app_appointment_index') }}">back to list</a>

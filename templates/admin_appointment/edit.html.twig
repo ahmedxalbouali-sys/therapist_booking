@@ -5,6 +5,15 @@
 {% block body %}
 <h1>Edit Appointment</h1>
 
+{# Display flash messages for errors/success #}
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
 {{ form_start(form) }}
     {{ form_widget(form) }}
     <button class="btn btn-success">Save</button>

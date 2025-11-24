@@ -29,6 +29,8 @@ class Appointment
     #[ORM\ManyToOne(inversedBy: 'appointments')]
     private ?Therapist $therapist = null;
 
+    // ---------- Getters and Setters ----------
+
     public function getId(): ?int
     {
         return $this->id;
@@ -42,52 +44,40 @@ class Appointment
     public function setStartAt(\DateTime $startAt): static
     {
         $this->startAt = $startAt;
-
         return $this;
     }
 
-
-
+    public function getEndAt(): ?\DateTime
+    {
+        return $this->startAt ? (clone $this->startAt)->modify('+1 hour') : null;
+    }
 
     public function getStatus(): string
     {
         $now = new \DateTime();
+        $endAt = $this->getEndAt();
 
-        if ($this->startAt > $now) {
-            return 'Free';
+        if (!$this->startAt) {
+            return 'scheduled';
         }
 
-        $endAt = (clone $this->startAt)->modify('+1 hour'); // 1-hour sessions
-        if ($now >= $this->startAt && $now < $endAt) {
-            return 'In progress';
+        if ($now < $this->startAt) {
+            return 'scheduled';
+        } elseif ($now >= $this->startAt && $now < $endAt) {
+            return 'in_progress';
         }
 
-        return 'Done';
+        return 'completed';
     }
-
-
-
 
     public function updateStatus(): void
     {
-        $now = new \DateTime();
-        $endAt = clone $this->startAt;
-        $endAt->modify('+1 hour');
-
-        if ($now < $this->startAt) {
-            $this->status = 'scheduled';
-        } elseif ($now >= $this->startAt && $now < $endAt) {
-            $this->status = 'in_progress';
-        } else {
-            $this->status = 'completed';
-        }
-    }      
-
+        $this->status = $this->getStatus();
+    }
 
     public function setStatus(string $status): static
     {
         $this->status = $status;
-
         return $this;
     }
 
@@ -99,7 +89,6 @@ class Appointment
     public function setNotes(?string $notes): static
     {
         $this->notes = $notes;
-
         return $this;
     }
 
@@ -111,7 +100,6 @@ class Appointment
     public function setClient(?User $client): static
     {
         $this->client = $client;
-
         return $this;
     }
 
@@ -120,14 +108,30 @@ class Appointment
         return $this->therapist;
     }
 
-
-
-    
-
     public function setTherapist(?Therapist $therapist): static
     {
         $this->therapist = $therapist;
-
         return $this;
+    }
+
+    // ---------- Collision Helper ----------
+
+    public function overlapsWith(Appointment $other): bool
+    {
+        if (!$this->startAt || !$other->getStartAt()) {
+            return false;
+        }
+
+        if ($this->therapist?->getId() !== $other->getTherapist()?->getId()) {
+            return false; // different therapist
+        }
+
+        $startA = $this->startAt;
+        $endA = $this->getEndAt();
+
+        $startB = $other->getStartAt();
+        $endB = $other->getEndAt();
+
+        return $startA < $endB && $endA > $startB;
     }
 }

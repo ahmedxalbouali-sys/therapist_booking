@@ -5,6 +5,15 @@
 {% block body %}
     <h1>Appointment index</h1>
 
+    {# Flash messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
     <table class="table">
         <thead>
             <tr>
@@ -25,11 +34,10 @@
                 <td>
                     <a href="{{ path('app_appointment_show', {'id': appointment.id}) }}">show</a>
 
-{% if appointment.status == 'scheduled' %}
-    <a href="{{ path('app_appointment_edit', {'id': appointment.id}) }}">edit</a>
-    {{ include('appointment/_delete_form.html.twig') }}
-{% endif %}
-
+                    {% if appointment.status == 'scheduled' %}
+                        <a href="{{ path('app_appointment_edit', {'id': appointment.id}) }}">edit</a>
+                        {{ include('appointment/_delete_form.html.twig') }}
+                    {% endif %}
                 </td>
             </tr>
         {% else %}

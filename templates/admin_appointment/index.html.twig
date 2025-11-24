@@ -5,6 +5,22 @@
 {% block body %}
 <h1>All Appointments</h1>
 
+{# Display flash messages #}
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<form method="get" action="{{ path('admin_appointment_index') }}" class="mb-3">
+    <input type="text" name="client" placeholder="Client name" value="{{ app.request.get('client') }}">
+    <input type="text" name="therapist" placeholder="Therapist name" value="{{ app.request.get('therapist') }}">
+    <input type="date" name="date" value="{{ app.request.get('date') }}">
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+</form>
+
 <table class="table">
     <thead>
         <tr>
@@ -17,13 +33,6 @@
         </tr>
     </thead>
     <tbody>
-
-    <form method="get" action="{{ path('admin_appointment_index') }}">
-    <input type="text" name="client" placeholder="Client name" value="{{ app.request.get('client') }}">
-    <input type="text" name="therapist" placeholder="Therapist name" value="{{ app.request.get('therapist') }}">
-    <input type="date" name="date" value="{{ app.request.get('date') }}">
-    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-    </form>
     {% for appointment in appointments %}
         <tr>
             <td>{{ appointment.id }}</td>
