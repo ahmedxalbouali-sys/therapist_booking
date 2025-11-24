@@ -3,19 +3,47 @@
 {% block title %}My Account{% endblock %}
 
 {% block body %}
-    <h1>My Account</h1>
+    <div class="container py-4">
 
-    {{ form_start(form) }}
-        {{ form_row(form.firstName) }}
-        {{ form_row(form.lastName) }}
-        {{ form_row(form.email) }}
-        {{ form_row(form.plainPassword.first) }}
-        {{ form_row(form.plainPassword.second) }}
+        <h1 class="mb-4">My Account</h1>
 
-        <button class="btn btn-primary">Update</button>
-    {{ form_end(form) }}
+        {# Flash messages first so user sees them immediately #}
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
 
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+
+                    <fieldset class="border p-3 mb-3 rounded">
+                        <legend class="float-none w-auto px-2 small text-muted">Personal Information</legend>
+
+                        {{ form_row(form.firstName) }}
+                        {{ form_row(form.lastName) }}
+                        {{ form_row(form.email) }}
+                        {{ form_row(form.phone) }}
+                    </fieldset>
+
+                    <fieldset class="border p-3 mb-3 rounded">
+                        <legend class="float-none w-auto px-2 small text-muted">Change Password</legend>
+
+                        {{ form_row(form.plainPassword.first) }}
+                        {{ form_row(form.plainPassword.second) }}
+                    </fieldset>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        Update Account
+                    </button>
+
+                {{ form_end(form) }}
+
+            </div>
+        </div>
+
+    </div>
 {% endblock %}
