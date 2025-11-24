@@ -17,17 +17,14 @@
         </tr>
     </thead>
     <tbody>
+
+    <form method="get" action="{{ path('admin_appointment_index') }}">
+    <input type="text" name="client" placeholder="Client name" value="{{ app.request.get('client') }}">
+    <input type="text" name="therapist" placeholder="Therapist name" value="{{ app.request.get('therapist') }}">
+    <input type="date" name="date" value="{{ app.request.get('date') }}">
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    </form>
     {% for appointment in appointments %}
-
-
-        <form method="get" action="{{ path('admin_appointment_index') }}">
-        <input type="text" name="client" placeholder="Client name" value="{{ app.request.get('client') }}">
-        <input type="text" name="therapist" placeholder="Therapist name" value="{{ app.request.get('therapist') }}">
-        <input type="date" name="date" value="{{ app.request.get('date') }}">
-        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-        </form>
-
-
         <tr>
             <td>{{ appointment.id }}</td>
             <td>{{ appointment.client.firstName }} {{ appointment.client.lastName }}</td>
