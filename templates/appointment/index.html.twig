@@ -7,7 +7,9 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-primary">My Appointments</h2>
-        <a href="{{ path('app_appointment_new') }}" class="btn btn-primary">Create New</a>
+        <a href="{{ path('app_appointment_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Create New
+        </a>
     </div>
 
     {# Flash messages #}
@@ -24,22 +26,24 @@
         <table class="table table-hover align-middle mb-0 bg-white">
             <thead class="table-light">
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Start Time</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Notes</th>
-                    <th scope="col">Actions</th>
+                    <th>Date & Time</th>
+                    <th>Therapist</th>
+                    <th>Specialty</th>
+                    <th>Status</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
             {% for appointment in appointments %}
                 <tr>
-                    <th scope="row">{{ appointment.id }}</th>
                     <td>{{ appointment.startAt ? appointment.startAt|date('Y-m-d H:i') : '-' }}</td>
+                    <td>{{ appointment.therapist.name }}</td>
+                    <td>{{ appointment.therapist.specialization }}</td>
                     <td>
-                        {% if appointment.status == 'scheduled' %}
+                        {% if appointment.status == 'completed' %}
                             <span class="badge bg-warning text-dark">{{ appointment.status|capitalize }}</span>
-                        {% elseif appointment.status == 'completed' %}
+                        {% elseif appointment.status == 'scheduled' %}
                             <span class="badge bg-success">{{ appointment.status|capitalize }}</span>
                         {% elseif appointment.status == 'cancelled' %}
                             <span class="badge bg-danger">{{ appointment.status|capitalize }}</span>
@@ -48,17 +52,21 @@
                         {% endif %}
                     </td>
                     <td>{{ appointment.notes ?: '-' }}</td>
-                    <td>
-                        <a href="{{ path('app_appointment_show', {'id': appointment.id}) }}" class="btn btn-sm btn-outline-primary me-1 mb-1">Show</a>
+                    <td class="d-flex flex-wrap gap-1">
+                        <a href="{{ path('app_appointment_show', {'id': appointment.id}) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i> Show
+                        </a>
                         {% if appointment.status == 'scheduled' %}
-                            <a href="{{ path('app_appointment_edit', {'id': appointment.id}) }}" class="btn btn-sm btn-outline-success me-1 mb-1">Edit</a>
+                            <a href="{{ path('app_appointment_edit', {'id': appointment.id}) }}" class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-edit me-1"></i> Edit
+                            </a>
                             {{ include('appointment/_delete_form.html.twig') }}
                         {% endif %}
                     </td>
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">No appointments found</td>
+                    <td colspan="7" class="text-center text-muted py-4">No appointments found</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -75,7 +83,14 @@
     .badge {
         font-size: 0.85rem;
         padding: 0.45em 0.7em;
-        border-radius: 8px;
+        border-radius: 0.5rem;
+    }
+
+    .btn-outline-success, .btn-outline-primary {
+        font-size: 0.85rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 0.45rem;
+        transition: all 0.2s ease-in-out;
     }
 
     .btn-outline-success:hover {
@@ -90,9 +105,12 @@
         border-color: #0d6efd !important;
     }
 
-    .btn-sm {
-        padding: 0.25rem 0.6rem;
-        font-size: 0.85rem;
+    .btn-sm i {
+        vertical-align: middle;
     }
 </style>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 {% endblock %}

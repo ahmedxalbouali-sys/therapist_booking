@@ -21,11 +21,29 @@
                 </tr>
                 <tr>
                     <th scope="row">Date & Time</th>
-                    <td>{{ appointment.startAt ? appointment.startAt|date('Y-m-d H:i') : '' }}</td>
+                    <td>{{ appointment.startAt ? appointment.startAt|date('Y-m-d H:i') : '—' }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Therapist</th>
+                    <td>{{ appointment.therapist.name }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Specialization</th>
+                    <td>{{ appointment.therapist.specialization }}</td>
                 </tr>
                 <tr>
                     <th scope="row">Status</th>
-                    <td>{{ appointment.status|capitalize }}</td>
+                    <td>
+                        {% if appointment.status == 'scheduled' %}
+                            <span class="badge bg-warning text-dark">{{ appointment.status|capitalize }}</span>
+                        {% elseif appointment.status == 'completed' %}
+                            <span class="badge bg-success">{{ appointment.status|capitalize }}</span>
+                        {% elseif appointment.status == 'cancelled' %}
+                            <span class="badge bg-danger">{{ appointment.status|capitalize }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ appointment.status|capitalize }}</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <th scope="row">Notes</th>
@@ -49,6 +67,12 @@
     .table th {
         font-weight: 600;
         color: #2b4c7e;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.45em 0.7em;
+        border-radius: 0.5rem;
     }
 
     .btn-outline-secondary:hover {

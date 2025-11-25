@@ -4,89 +4,145 @@
 
 {% block stylesheets %}
 <style>
-    /* Professional card styling */
-    .card-custom {
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 2rem;
-        background-color: #fff;
+    /* Page spacing */
+    .appointment-container {
+        max-width: 950px;
+        margin: auto;
     }
 
-    /* Header styling */
+    /* Header */
     .page-header {
+        font-weight: 700;
+        font-size: 2rem;
+        color: #1a1a1a;
+        text-align: center;
+        margin-bottom: 2.2rem;
+    }
+
+    /* Card */
+    .card-custom {
+        border-radius: 15px;
+        padding: 2.5rem;
+        background: #ffffff;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+        position: relative;
+        transition: 0.3s;
+    }
+
+    .card-custom:hover {
+        box-shadow: 0 10px 34px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Form Styling */
+    .form-label {
         font-weight: 600;
-        font-size: 1.75rem;
-        margin-bottom: 2rem;
-        color: #343a40;
+        color: #333;
     }
 
-    /* Form field styling */
-    .form-control:focus {
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 1px solid #d4d4d4;
+        transition: all 0.25s ease;
+    }
+
+    .form-control:hover,
+    .form-select:hover {
         border-color: #0d6efd;
-        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
     }
 
-    /* Button styling */
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, .25);
+    }
+
+    /* Buttons */
     .btn-save {
-        background-color: #0d6efd;
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
         border: none;
+        padding: 0.7rem 1.4rem;
+        font-size: 1rem;
+        border-radius: 10px;
+        transition: 0.25s;
     }
 
     .btn-save:hover {
-        background-color: #0b5ed7;
+        background: linear-gradient(135deg, #0b5ed7, #094fab);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(13, 110, 253, .3);
     }
 
     .btn-back {
         background-color: #6c757d;
         border: none;
+        padding: 0.7rem 1.4rem;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: 0.25s;
     }
 
     .btn-back:hover {
-        background-color: #5c636a;
+        background-color: #565e64;
+        transform: translateY(-2px);
     }
 
-    /* Flash messages */
+    /* Alerts */
     .alert {
-        border-radius: 8px;
+        border-radius: 10px;
         font-size: 0.95rem;
+    }
+
+    @media (max-width: 768px) {
+        .card-custom {
+            padding: 1.5rem;
+        }
+        .page-header {
+            font-size: 1.6rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="container py-5">
+<div class="appointment-container py-5">
 
     <h1 class="page-header">Edit Appointment</h1>
 
-    {# Flash messages #}
+    {# Flash Messages #}
     {% for label, messages in app.flashes %}
         {% for message in messages %}
             <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         {% endfor %}
     {% endfor %}
 
-    <div class="card card-custom">
+    <div class="card-custom">
+
         {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
 
-            {# Arrange fields in a responsive grid #}
             <div class="row g-4">
                 {% for child in form %}
                     <div class="col-md-6">
-                        {{ form_row(child) }}
+                        {{ form_row(child, {
+                            label_attr: { class: 'form-label' },
+                            attr: { class: 'form-control' }
+                        }) }}
                     </div>
                 {% endfor %}
             </div>
 
-            {# Action buttons #}
-            <div class="mt-4 d-flex gap-3">
+            <div class="mt-4 d-flex gap-3 flex-wrap justify-content-start">
                 <button type="submit" class="btn btn-save text-white">
                     <i class="fas fa-save me-2"></i> Save Changes
                 </button>
+
                 <a href="{{ path('admin_appointment_index') }}" class="btn btn-back text-white">
-                    <i class="fas fa-arrow-left me-2"></i> Back to Appointments
+                    <i class="fas fa-arrow-left me-2"></i> Back
                 </a>
             </div>
 
@@ -95,7 +151,4 @@
 
 </div>
 
-{% block javascripts %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-{% endblock %}
 {% endblock %}

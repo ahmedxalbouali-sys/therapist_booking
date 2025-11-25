@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Appointment | Admin{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">Create New Appointment</h2>
+        <a href="{{ path('admin_appointment_index') }}" class="btn btn-outline-secondary">Back to Appointments</a>
+    </div>
+
+    {# Flash messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="card shadow-sm p-5 bg-white rounded">
+        {{ form_start(form) }}
+
+        {# Client selection (visible to admin) #}
+        <div class="mb-4">
+            {{ form_label(form.client, 'Select Client', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.client, {'attr': {'class': 'form-select form-select-lg'}}) }}
+            {{ form_errors(form.client) }}
+        </div>
+
+        {# Therapist selection #}
+        <div class="mb-4">
+            {{ form_label(form.therapist, 'Select Therapist', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.therapist, {'attr': {'class': 'form-select form-select-lg'}}) }}
+            {{ form_errors(form.therapist) }}
+        </div>
+
+        {# Appointment date and time #}
+        <div class="mb-4">
+            {{ form_label(form.startAt, 'Select Date & Time', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.startAt, {'attr': {'class': 'form-control form-control-lg', 'type': 'datetime-local'}}) }}
+            {{ form_errors(form.startAt) }}
+        </div>
+
+        {# Notes #}
+        <div class="mb-4">
+            {{ form_label(form.notes, 'Notes (Optional)', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.notes, {'attr': {'class': 'form-control form-control-lg', 'rows': 3, 'placeholder': 'Additional details'}}) }}
+            {{ form_errors(form.notes) }}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100" style="background:#2b4c7e; border:none; border-radius: 8px;">
+            Create Appointment
+        </button>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<style>
+    .card {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .alert {
+        margin-bottom: 1rem;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d !important;
+        color: #fff !important;
+    }
+</style>
+{% endblock %}
