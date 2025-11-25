@@ -1,48 +1,113 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Therapist index{% endblock %}
+{% block title %}Therapists Management{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Card container for table */
+    .card-custom {
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 2rem;
+        background-color: #fff;
+        margin-top: 2rem;
+    }
+
+    /* Table styling */
+    .table th, .table td {
+        vertical-align: middle;
+    }
+
+    .table img {
+        border-radius: 6px;
+        max-width: 120px;
+        height: auto;
+    }
+
+    /* Buttons */
+    .btn-action {
+        margin-right: 0.25rem;
+    }
+
+    .btn-create {
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
 
 {% block body %}
-    <h1>Therapist index</h1>
+<div class="container py-4">
+    <h1 class="mb-4">Therapists Management</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Specialization</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Description</th>
-                <th>Photo</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for therapist in therapists %}
-            <tr>
-                <td>{{ therapist.id }}</td>
-                <td>{{ therapist.name }}</td>
-                <td>{{ therapist.specialization }}</td>
-                <td>{{ therapist.email }}</td>
-                <td>{{ therapist.phone }}</td>
-                <td>{{ therapist.description }}</td>
-                <td>{% if therapist.photo %}
-    <img src="{{ asset('uploads/therapists/' ~ therapist.photo) }}" alt="{{ therapist.name }}" style="max-width:200px;">
-{% endif %}
-</td>
-                <td>
-                    <a href="{{ path('admin_therapist_show', {'id': therapist.id}) }}">show</a>
-                    <a href="{{ path('admin_therapist_edit', {'id': therapist.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="8">no records found</td>
-            </tr>
+    {# Flash messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
         {% endfor %}
-        </tbody>
-    </table>
+    {% endfor %}
 
-    <a href="{{ path('admin_therapist_new') }}">Create new</a>
+    <div class="card card-custom">
+        <table class="table table-hover table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Specialization</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Description</th>
+                    <th>Photo</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for therapist in therapists %}
+                <tr>
+                    <td>{{ therapist.id }}</td>
+                    <td>{{ therapist.name }}</td>
+                    <td>{{ therapist.specialization }}</td>
+                    <td>{{ therapist.email }}</td>
+                    <td>{{ therapist.phone }}</td>
+                    <td>{{ therapist.description|length > 50 ? therapist.description[:50] ~ '...' : therapist.description }}</td>
+                    <td>
+                        {% if therapist.photo %}
+                            <img src="{{ asset('uploads/therapists/' ~ therapist.photo) }}" alt="{{ therapist.name }}">
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ path('admin_therapist_show', {'id': therapist.id}) }}" class="btn btn-info btn-sm btn-action">
+                            <i class="fas fa-eye"></i> Show
+                        </a>
+                        <a href="{{ path('admin_therapist_edit', {'id': therapist.id}) }}" class="btn btn-primary btn-sm btn-action">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {# Delete button form #}
+                        <form method="post" action="{{ path('admin_therapist_delete', {'id': therapist.id}) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this therapist?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ therapist.id) }}">
+                            <button class="btn btn-danger btn-sm btn-action" type="submit">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8" class="text-center">No therapists found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{{ path('admin_therapist_new') }}" class="btn btn-success btn-create">
+            <i class="fas fa-plus"></i> Create New Therapist
+        </a>
+    </div>
+</div>
+
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+{% endblock %}
 {% endblock %}

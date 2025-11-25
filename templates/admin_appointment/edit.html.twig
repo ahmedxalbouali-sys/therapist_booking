@@ -2,22 +2,100 @@
 
 {% block title %}Edit Appointment{% endblock %}
 
+{% block stylesheets %}
+<style>
+    /* Professional card styling */
+    .card-custom {
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 2rem;
+        background-color: #fff;
+    }
+
+    /* Header styling */
+    .page-header {
+        font-weight: 600;
+        font-size: 1.75rem;
+        margin-bottom: 2rem;
+        color: #343a40;
+    }
+
+    /* Form field styling */
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+    }
+
+    /* Button styling */
+    .btn-save {
+        background-color: #0d6efd;
+        border: none;
+    }
+
+    .btn-save:hover {
+        background-color: #0b5ed7;
+    }
+
+    .btn-back {
+        background-color: #6c757d;
+        border: none;
+    }
+
+    .btn-back:hover {
+        background-color: #5c636a;
+    }
+
+    /* Flash messages */
+    .alert {
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
-<h1>Edit Appointment</h1>
+<div class="container py-5">
 
-{# Display flash messages for errors/success #}
-{% for label, messages in app.flashes %}
-    {% for message in messages %}
-        <div class="alert alert-{{ label }}">
-            {{ message }}
-        </div>
+    <h1 class="page-header">Edit Appointment</h1>
+
+    {# Flash messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
     {% endfor %}
-{% endfor %}
 
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn btn-success">Save</button>
-{{ form_end(form) }}
+    <div class="card card-custom">
+        {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
 
-<a href="{{ path('admin_appointment_index') }}" class="btn btn-secondary mt-2">Back to list</a>
+            {# Arrange fields in a responsive grid #}
+            <div class="row g-4">
+                {% for child in form %}
+                    <div class="col-md-6">
+                        {{ form_row(child) }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            {# Action buttons #}
+            <div class="mt-4 d-flex gap-3">
+                <button type="submit" class="btn btn-save text-white">
+                    <i class="fas fa-save me-2"></i> Save Changes
+                </button>
+                <a href="{{ path('admin_appointment_index') }}" class="btn btn-back text-white">
+                    <i class="fas fa-arrow-left me-2"></i> Back to Appointments
+                </a>
+            </div>
+
+        {{ form_end(form) }}
+    </div>
+
+</div>
+
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+{% endblock %}
 {% endblock %}

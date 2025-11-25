@@ -1,52 +1,98 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Appointment index{% endblock %}
+{% block title %}My Appointments | Therapist Booking{% endblock %}
 
 {% block body %}
-    <h1>Appointment index</h1>
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">My Appointments</h2>
+        <a href="{{ path('app_appointment_new') }}" class="btn btn-primary">Create New</a>
+    </div>
 
     {# Flash messages #}
     {% for label, messages in app.flashes %}
         {% for message in messages %}
-            <div class="alert alert-{{ label }}">
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
                 {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
     {% endfor %}
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>StartAt</th>
-                <th>Status</th>
-                <th>Notes</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for appointment in appointments %}
-            <tr>
-                <td>{{ appointment.id }}</td>
-                <td>{{ appointment.startAt ? appointment.startAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ appointment.status }}</td>
-                <td>{{ appointment.notes }}</td>
-                <td>
-                    <a href="{{ path('app_appointment_show', {'id': appointment.id}) }}">show</a>
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover align-middle mb-0 bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Notes</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for appointment in appointments %}
+                <tr>
+                    <th scope="row">{{ appointment.id }}</th>
+                    <td>{{ appointment.startAt ? appointment.startAt|date('Y-m-d H:i') : '-' }}</td>
+                    <td>
+                        {% if appointment.status == 'scheduled' %}
+                            <span class="badge bg-warning text-dark">{{ appointment.status|capitalize }}</span>
+                        {% elseif appointment.status == 'completed' %}
+                            <span class="badge bg-success">{{ appointment.status|capitalize }}</span>
+                        {% elseif appointment.status == 'cancelled' %}
+                            <span class="badge bg-danger">{{ appointment.status|capitalize }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ appointment.status|capitalize }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ appointment.notes ?: '-' }}</td>
+                    <td>
+                        <a href="{{ path('app_appointment_show', {'id': appointment.id}) }}" class="btn btn-sm btn-outline-primary me-1 mb-1">Show</a>
+                        {% if appointment.status == 'scheduled' %}
+                            <a href="{{ path('app_appointment_edit', {'id': appointment.id}) }}" class="btn btn-sm btn-outline-success me-1 mb-1">Edit</a>
+                            {{ include('appointment/_delete_form.html.twig') }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">No appointments found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
-                    {% if appointment.status == 'scheduled' %}
-                        <a href="{{ path('app_appointment_edit', {'id': appointment.id}) }}">edit</a>
-                        {{ include('appointment/_delete_form.html.twig') }}
-                    {% endif %}
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f1f5f9;
+        transition: background 0.2s ease-in-out;
+    }
 
-    <a href="{{ path('app_appointment_new') }}">Create new</a>
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.45em 0.7em;
+        border-radius: 8px;
+    }
+
+    .btn-outline-success:hover {
+        color: #fff !important;
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+    }
+
+    .btn-outline-primary:hover {
+        color: #fff !important;
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.6rem;
+        font-size: 0.85rem;
+    }
+</style>
 {% endblock %}

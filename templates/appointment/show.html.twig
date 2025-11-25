@@ -1,34 +1,59 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Appointment{% endblock %}
+{% block title %}Appointment Details | Therapist Booking{% endblock %}
 
 {% block body %}
-    <h1>Appointment</h1>
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">Appointment Details</h2>
+        <div>
+            <a href="{{ path('app_appointment_index') }}" class="btn btn-outline-secondary me-2">Back to List</a>
+            <a href="{{ path('app_appointment_edit', {'id': appointment.id}) }}" class="btn btn-primary" style="background:#2b4c7e; border:none;">Edit</a>
+        </div>
+    </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ appointment.id }}</td>
-            </tr>
-            <tr>
-                <th>StartAt</th>
-                <td>{{ appointment.startAt ? appointment.startAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Status</th>
-                <td>{{ appointment.status }}</td>
-            </tr>
-            <tr>
-                <th>Notes</th>
-                <td>{{ appointment.notes }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="card shadow-sm p-4 bg-white rounded">
+        <table class="table table-borderless mb-0">
+            <tbody>
+                <tr>
+                    <th scope="row" style="width: 150px;">ID</th>
+                    <td>{{ appointment.id }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Date & Time</th>
+                    <td>{{ appointment.startAt ? appointment.startAt|date('Y-m-d H:i') : '' }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Status</th>
+                    <td>{{ appointment.status|capitalize }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Notes</th>
+                    <td>{{ appointment.notes ?: '—' }}</td>
+                </tr>
+            </tbody>
+        </table>
 
-    <a href="{{ path('app_appointment_index') }}">back to list</a>
+        <div class="mt-4 text-center">
+            {{ include('appointment/_delete_form.html.twig') }}
+        </div>
+    </div>
+</div>
 
-    <a href="{{ path('app_appointment_edit', {'id': appointment.id}) }}">edit</a>
+<style>
+    .card {
+        max-width: 700px;
+        margin: 0 auto;
+    }
 
-    {{ include('appointment/_delete_form.html.twig') }}
+    .table th {
+        font-weight: 600;
+        color: #2b4c7e;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d !important;
+        color: #fff !important;
+    }
+</style>
 {% endblock %}

@@ -1,11 +1,123 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Therapist{% endblock %}
+{% block title %}Create New Therapist{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .card-custom {
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 2rem;
+        background-color: #fff;
+        margin-top: 2rem;
+    }
+
+    .btn-back {
+        margin-top: 1rem;
+    }
+
+    .form-floating input,
+    .form-floating textarea,
+    .form-floating select {
+        border-radius: 8px;
+        padding: 1rem 0.75rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    textarea.form-control {
+        height: 120px;
+    }
+
+    .form-control-file {
+        padding: 0.375rem 0.75rem;
+    }
+</style>
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Therapist</h1>
+<div class="container py-4">
+    <h1 class="mb-4">Create New Therapist</h1>
 
-    {{ include('admin/therapist/_form.html.twig') }}
+    {# Flash messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
 
-    <a href="{{ path('admin_therapist_index') }}">back to list</a>
+    <div class="card card-custom">
+        {{ form_start(form) }}
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    {{ form_widget(form.name, {attr: {class: 'form-control', placeholder: 'Name'}}) }}
+                    {{ form_label(form.name) }}
+                    {{ form_errors(form.name) }}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-floating">
+                    {{ form_widget(form.specialization, {attr: {class: 'form-control', placeholder: 'Specialization'}}) }}
+                    {{ form_label(form.specialization) }}
+                    {{ form_errors(form.specialization) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    {{ form_widget(form.email, {attr: {class: 'form-control', placeholder: 'Email'}}) }}
+                    {{ form_label(form.email) }}
+                    {{ form_errors(form.email) }}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-floating">
+                    {{ form_widget(form.phone, {attr: {class: 'form-control', placeholder: 'Phone'}}) }}
+                    {{ form_label(form.phone) }}
+                    {{ form_errors(form.phone) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-floating">
+                {{ form_widget(form.description, {attr: {class: 'form-control', placeholder: 'Description'}}) }}
+                {{ form_label(form.description) }}
+                {{ form_errors(form.description) }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.photo) }}
+            {{ form_widget(form.photo, {attr: {class: 'form-control form-control-file'}}) }}
+            {{ form_errors(form.photo) }}
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 py-2">
+            <i class="fas fa-plus-circle"></i> Create Therapist
+        </button>
+
+        {{ form_end(form) }}
+    </div>
+
+    <a href="{{ path('admin_therapist_index') }}" class="btn btn-secondary btn-back mt-3">
+        <i class="fas fa-arrow-left"></i> Back to List
+    </a>
+</div>
+
+{% block javascripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+{% endblock %}
 {% endblock %}

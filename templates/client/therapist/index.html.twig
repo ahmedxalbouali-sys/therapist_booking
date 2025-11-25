@@ -1,48 +1,99 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Therapists{% endblock %}
+{% block title %}Therapists | Therapist Booking{% endblock %}
 
 {% block body %}
-<h1>Therapists</h1>
 
-<form method="get" action="{{ path('client_therapist_index') }}">
-    <input type="text" name="name" placeholder="Name" value="{{ search_name }}">
-    <input type="text" name="specialization" placeholder="Specialization" value="{{ search_specialization }}">
-    <button type="submit">Search</button>
+<style>
+    .search-form {
+        margin-bottom: 2rem;
+    }
+
+    .search-form input {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .therapist-photo {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .table thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f1f3f5;
+        transition: background-color 0.15s ease;
+    }
+
+    .btn-view {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.5rem;
+    }
+</style>
+
+<h1 class="mb-4">Therapists</h1>
+
+<form method="get" action="{{ path('client_therapist_index') }}" class="search-form row g-2 align-items-center">
+    <div class="col-sm-4">
+        <input type="text" class="form-control" name="name" placeholder="Name" value="{{ search_name }}">
+    </div>
+    <div class="col-sm-4">
+        <input type="text" class="form-control" name="specialization" placeholder="Specialization" value="{{ search_specialization }}">
+    </div>
+    <div class="col-sm-4">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+    </div>
 </form>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Specialization</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Description</th>
-            <th>Photo</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for therapist in therapists %}
-        <tr>
-            <td>{{ therapist.name }}</td>
-            <td>{{ therapist.specialization }}</td>
-            <td>{{ therapist.email }}</td>
-            <td>{{ therapist.phone }}</td>
-            <td>{{ therapist.description }}</td>
-            <td>
-                {% if therapist.photo %}
-                    <img src="{{ asset('uploads/therapists/' ~ therapist.photo) }}" style="max-width:100px;">
-                {% endif %}
-            </td>
-            <td><a href="{{ path('client_therapist_show', {'id': therapist.id}) }}">View</a></td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="7">No therapists found</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Name</th>
+                <th>Specialization</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Description</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for therapist in therapists %}
+            <tr>
+                <td>
+                    {% if therapist.photo %}
+                        <img src="{{ asset('uploads/therapists/' ~ therapist.photo) }}" class="therapist-photo" alt="{{ therapist.name }}">
+                    {% else %}
+                        <div class="therapist-photo bg-secondary d-flex justify-content-center align-items-center text-white">
+                            N/A
+                        </div>
+                    {% endif %}
+                </td>
+                <td>{{ therapist.name }}</td>
+                <td>{{ therapist.specialization }}</td>
+                <td>{{ therapist.email }}</td>
+                <td>{{ therapist.phone }}</td>
+                <td>{{ therapist.description|length > 50 ? therapist.description|slice(0,50) ~ '...' : therapist.description }}</td>
+                <td>
+                    <a href="{{ path('client_therapist_show', {'id': therapist.id}) }}" class="btn btn-outline-primary btn-view">View</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7" class="text-center py-3">No therapists found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 {% endblock %}
