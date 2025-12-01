@@ -38,8 +38,8 @@
             {% for appointment in appointments %}
                 <tr>
                     <td>{{ appointment.startAt ? appointment.startAt|date('Y-m-d H:i') : '-' }}</td>
-                    <td>{{ appointment.therapist.name }}</td>
-                    <td>{{ appointment.therapist.specialization }}</td>
+                    <td>{{ appointment.therapist ? appointment.therapist.name : '-' }}</td>
+                    <td>{{ appointment.therapist ? appointment.therapist.specialization : '-' }}</td>
                     <td>
                         {% if appointment.status == 'completed' %}
                             <span class="badge bg-warning text-dark">{{ appointment.status|capitalize }}</span>

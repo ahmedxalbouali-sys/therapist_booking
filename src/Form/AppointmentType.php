@@ -9,6 +9,7 @@ use App\Repository\AppointmentRepository;
 use App\Repository\TherapistRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -38,12 +39,25 @@ class AppointmentType extends AbstractType
                 'class' => User::class,
                 'choice_label' => fn(User $u) => $u->getFirstName() . ' ' . $u->getLastName(),
                 'disabled' => !$options['is_admin'],
-                'data' => $options['current_user'] ?? null, // auto-select current user for clients
+                'data' => $options['current_user'] ?? null,
             ])
             ->add('therapist', EntityType::class, [
                 'class' => Therapist::class,
                 'choice_label' => 'name',
             ]);
+
+        // Add status field only for admins
+        if ($options['is_admin']) {
+            $builder->add('status', ChoiceType::class, [
+                'choices' => [
+                    'Scheduled'    => 'scheduled',
+                    'In Progress'  => 'in_progress',
+                    'Completed'    => 'completed',
+                ],
+                'label' => 'Status',
+                'placeholder' => 'Select status',
+            ]);
+        }
 
         // Event listener for dynamic therapist availability
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
@@ -86,7 +100,7 @@ class AppointmentType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Appointment::class,
             'is_admin' => false,
-            'current_user' => null, // pass current user for client pages
+            'current_user' => null,
         ]);
     }
 }

@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\AppointmentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+
 
 #[ORM\Entity(repositoryClass: AppointmentRepository::class)]
 class Appointment
@@ -53,27 +55,14 @@ class Appointment
     }
 
     public function getStatus(): string
-    {
-        $now = new \DateTime();
-        $endAt = $this->getEndAt();
-
-        if (!$this->startAt) {
-            return 'scheduled';
-        }
-
-        if ($now < $this->startAt) {
-            return 'scheduled';
-        } elseif ($now >= $this->startAt && $now < $endAt) {
-            return 'in_progress';
-        }
-
-        return 'completed';
-    }
+{
+    return $this->status ?? 'scheduled';
+}
 
     public function updateStatus(): void
-    {
-        $this->status = $this->getStatus();
-    }
+{
+    $this->status = $this->computeStatusAutomatically();
+}
 
     public function setStatus(string $status): static
     {
@@ -134,4 +123,25 @@ class Appointment
 
         return $startA < $endB && $endA > $startB;
     }
+
+    public function computeStatusAutomatically(): string
+{
+    $now = new \DateTime();
+    $endAt = $this->getEndAt();
+
+    if (!$this->startAt) {
+        return 'scheduled';
+    }
+
+    if ($now < $this->startAt) {
+        return 'scheduled';
+    }
+
+    if ($now >= $this->startAt && $now < $endAt) {
+        return 'in_progress';
+    }
+
+    return 'completed';
+}
+
 }

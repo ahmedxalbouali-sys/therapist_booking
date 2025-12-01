@@ -153,16 +153,15 @@
 
                     {# Status Badge #}
                     <td>
-                        {% if appointment.status == 'scheduled' %}
-                            <span class="badge bg-warning text-dark">Scheduled</span>
-                        {% elseif appointment.status == 'in_progress' %}
-                            <span class="badge bg-info text-white">In Progress</span>
-                        {% elseif appointment.status == 'completed' %}
-                            <span class="badge bg-success">Completed</span>
-                        {% else %}
-                            <span class="badge bg-secondary">{{ appointment.status|capitalize }}</span>
-                        {% endif %}
-                    </td>
+    <span class="badge
+        {% if appointment.status == 'scheduled' %} bg-warning 
+        {% elseif appointment.status == 'in_progress' %} bg-info 
+        {% elseif appointment.status == 'completed' %} bg-success 
+        {% endif %}
+    ">
+        {{ appointment.status|capitalize }}
+    </span>
+</td>
 
                     <td>{{ appointment.notes ?: '-' }}</td>
 
