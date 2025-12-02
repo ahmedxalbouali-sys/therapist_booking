@@ -151,4 +151,35 @@ class Therapist
 
         return $this;
     }
+
+
+
+    /**
+     * The User account associated with this Therapist (nullable)
+     */
+    #[ORM\OneToOne(inversedBy: 'therapist', targetEntity: User::class, cascade: ['persist'])]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", onDelete: "SET NULL", nullable: true)]
+    private ?User $user = null;
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        // keep the reverse side in sync
+        if ($user && $user->getTherapist() !== $this) {
+            $user->setTherapist($this);
+        }
+
+        return $this;
+    }
+
+
+
+
+
 }

@@ -159,6 +159,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+
+    /**
+     * One User may be linked to one Therapist (nullable).
+     */
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: Therapist::class, cascade: ['persist', 'remove'])]
+    private ?Therapist $therapist = null;
+
+    public function getTherapist(): ?Therapist
+    {
+        return $this->therapist;
+    }
+
+    public function setTherapist(?Therapist $therapist): self
+    {
+        // set the owning side of the relation if necessary
+        if ($therapist && $therapist->getUser() !== $this) {
+            $therapist->setUser($this);
+        }
+
+        $this->therapist = $therapist;
+
+        return $this;
+    }
+    
+
     /**
      * @return Collection<int, Appointment>
      */

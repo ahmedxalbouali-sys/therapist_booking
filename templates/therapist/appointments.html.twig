@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Appointments{% endblock %}
+
+{% block body %}
+<h1 class="section-title mb-4">My Appointments</h1>
+
+<table class="table table-hover table-striped align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Client</th>
+            <th>Start At</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.client.firstName ~ ' ' ~ appointment.client.lastName }}</td>
+                <td>{{ appointment.startAt|date('Y-m-d H:i') }}</td>
+                <td>
+                    <form method="post" class="d-flex align-items-center gap-2" action="{{ path('therapist_appointment_update_status', {'id': appointment.id}) }}">
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="scheduled" {{ appointment.status == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                            <option value="in_progress" {{ appointment.status == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                            <option value="completed" {{ appointment.status == 'completed' ? 'selected' : '' }}>Completed</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-success">Confirm</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3" class="text-center">No appointments found.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
