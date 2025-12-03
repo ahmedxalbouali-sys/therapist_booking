@@ -4,40 +4,145 @@
 
 {% block stylesheets %}
 <style>
-    /* Card container for table */
+    /* Header: title left, button right */
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .header-container h1 {
+        font-size: 1.8rem;
+        color: #000;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    /* Create button */
+    .btn-create {
+        white-space: nowrap;
+    }
+
+    /* Card container */
     .card-custom {
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 2rem;
         background-color: #fff;
-        margin-top: 2rem;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
     /* Table styling */
-    .table th, .table td {
-        vertical-align: middle;
+    .therapists-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        table-layout: fixed;
     }
 
-    .table img {
-        border-radius: 6px;
-        max-width: 120px;
-        height: auto;
+    .therapists-table th, .therapists-table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        text-align: center;
+        word-wrap: break-word;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .therapists-table thead {
+        background-color: #f8f9fa;
+    }
+
+    .therapists-table thead th {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .therapists-table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .therapists-table tbody tr:hover {
+        background-color: #f1f3f5;
+        transition: background-color 0.2s ease;
+    }
+
+    /* Left align specific columns */
+    .therapists-table td[data-label="Name"],
+    .therapists-table td[data-label="Specialization"],
+    .therapists-table td[data-label="Email"] {
+        text-align: left;
+    }
+
+    /* Image styling */
+    .therapists-table img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 8px;
+        display: block;
+        margin: 0 auto;
     }
 
     /* Buttons */
     .btn-action {
-        margin-right: 0.25rem;
+        margin: 0.2rem 0.2rem 0.2rem 0;
+        font-size: 0.85rem;
     }
 
-    .btn-create {
-        margin-top: 1rem;
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .therapists-table thead {
+            display: none;
+        }
+
+        .therapists-table tbody tr {
+            display: block;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+        }
+
+        .therapists-table tbody td {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+
+        .therapists-table tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #495057;
+            flex: 0 0 120px;
+        }
+
+        .therapists-table tbody td img {
+            width: 60px;
+            height: 60px;
+            margin: 0;
+        }
+
+        .header-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .header-container .btn-create {
+            margin-top: 0.75rem;
+            align-self: flex-end;
+        }
     }
 </style>
 {% endblock %}
 
 {% block body %}
 <div class="container py-4">
-    <h1 class="mb-4">Therapists Management</h1>
+    <div class="header-container">
+        <h1>Therapists Management</h1>
+        <a href="{{ path('admin_therapist_new') }}" class="btn btn-success btn-create">
+            <i class="fas fa-plus"></i> Create New Therapist
+        </a>
+    </div>
 
     {# Flash messages #}
     {% for label, messages in app.flashes %}
@@ -50,64 +155,61 @@
     {% endfor %}
 
     <div class="card card-custom">
-        <table class="table table-hover table-striped align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Specialization</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Description</th>
-                    <th>Photo</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for therapist in therapists %}
-                <tr>
-                    <td>{{ therapist.id }}</td>
-                    <td>{{ therapist.name }}</td>
-                    <td>{{ therapist.specialization }}</td>
-                    <td>{{ therapist.email }}</td>
-                    <td>{{ therapist.phone }}</td>
-                    <td>{{ therapist.description|length > 50 ? therapist.description[:50] ~ '...' : therapist.description }}</td>
-                    <td>
-                        {% if therapist.photo %}
-                            <img src="{{ asset('uploads/therapists/' ~ therapist.photo) }}" alt="{{ therapist.name }}">
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{{ path('admin_therapist_show', {'id': therapist.id}) }}" class="btn btn-info btn-sm btn-action">
-                            <i class="fas fa-eye"></i> Show
-                        </a>
-                        <a href="{{ path('admin_therapist_edit', {'id': therapist.id}) }}" class="btn btn-primary btn-sm btn-action">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                        {# Delete button form #}
-                        <form method="post" action="{{ path('admin_therapist_delete', {'id': therapist.id}) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this therapist?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ therapist.id) }}">
-                            <button class="btn btn-danger btn-sm btn-action" type="submit">
-                                <i class="fas fa-trash-alt"></i> Delete
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="8" class="text-center">No therapists found</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-        <a href="{{ path('admin_therapist_new') }}" class="btn btn-success btn-create">
-            <i class="fas fa-plus"></i> Create New Therapist
-        </a>
+        <div class="table-responsive">
+            <table class="therapists-table">
+                <thead>
+                    <tr>
+                        <th style="width:5%;">ID</th>
+                        <th style="width:15%;">Name</th>
+                        <th style="width:15%;">Specialization</th>
+                        <th style="width:20%;">Email</th>
+                        <th style="width:10%;">Phone</th>
+                        <th style="width:20%;">Description</th>
+                        <th style="width:10%;">Photo</th>
+                        <th style="width:15%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for therapist in therapists %}
+                        <tr>
+                            <td data-label="ID">{{ therapist.id }}</td>
+                            <td data-label="Name">{{ therapist.name }}</td>
+                            <td data-label="Specialization">{{ therapist.specialization }}</td>
+                            <td data-label="Email">{{ therapist.email }}</td>
+                            <td data-label="Phone">{{ therapist.phone ?: '-' }}</td>
+                            <td data-label="Description">{{ therapist.description|length > 50 ? therapist.description[:50] ~ '...' : therapist.description }}</td>
+                            <td data-label="Photo">
+                                {% if therapist.photo %}
+                                    <img src="{{ asset('uploads/therapists/' ~ therapist.photo) }}" alt="{{ therapist.name }}">
+                                {% endif %}
+                            </td>
+                            <td data-label="Actions">
+                                <a href="{{ path('admin_therapist_show', {'id': therapist.id}) }}" class="btn btn-info btn-sm btn-action">
+                                    <i class="fas fa-eye"></i> Show
+                                </a>
+                                <a href="{{ path('admin_therapist_edit', {'id': therapist.id}) }}" class="btn btn-primary btn-sm btn-action">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <form method="post" action="{{ path('admin_therapist_delete', {'id': therapist.id}) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this therapist?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ therapist.id) }}">
+                                    <button class="btn btn-danger btn-sm btn-action" type="submit">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">No therapists found</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 {% block javascripts %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 {% endblock %}
 {% endblock %}

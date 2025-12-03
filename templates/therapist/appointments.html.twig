@@ -3,37 +3,114 @@
 {% block title %}My Appointments{% endblock %}
 
 {% block body %}
-<h1 class="section-title mb-4">My Appointments</h1>
+<style>
+    .section-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        text-align: center;
+        color: #0d6efd;
+        margin-bottom: 2.5rem;
+    }
 
-<table class="table table-hover table-striped align-middle">
-    <thead class="table-dark">
-        <tr>
-            <th>Client</th>
-            <th>Start At</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for appointment in appointments %}
-            <tr>
-                <td>{{ appointment.client.firstName ~ ' ' ~ appointment.client.lastName }}</td>
-                <td>{{ appointment.startAt|date('Y-m-d H:i') }}</td>
-                <td>
-                    <form method="post" class="d-flex align-items-center gap-2" action="{{ path('therapist_appointment_update_status', {'id': appointment.id}) }}">
-                        <select name="status" class="form-select form-select-sm">
-                            <option value="scheduled" {{ appointment.status == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                            <option value="in_progress" {{ appointment.status == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                            <option value="completed" {{ appointment.status == 'completed' ? 'selected' : '' }}>Completed</option>
-                        </select>
-                        <button type="submit" class="btn btn-sm btn-success">Confirm</button>
-                    </form>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="3" class="text-center">No appointments found.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    .appointments-table {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        background-color: #fff;
+    }
+
+    .appointments-table thead {
+        background: linear-gradient(to right, #0d6efd, #3b82f6);
+        color: #fff;
+        text-align: center;
+    }
+
+    .appointments-table tbody tr {
+        transition: background-color 0.2s;
+    }
+
+    .appointments-table tbody tr:hover {
+        background-color: #f1f3f5;
+    }
+
+    .appointments-table tbody td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .appointments-table tbody td:first-child {
+        text-align: left;
+        font-weight: 500;
+        color: #1f2937;
+    }
+
+    .status-form {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .status-form select.form-select {
+        min-width: 140px;
+    }
+
+    .status-form button {
+        white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+        .section-title {
+            
+            font-size: 1.75rem;
+        }
+
+        .status-form {
+            flex-direction: column;
+        }
+
+        .status-form select,
+        .status-form button {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container mt-5">
+    <h1 class="section-title">My Appointments</h1>
+
+    <div class="table-responsive appointments-table">
+        <table class="table table-borderless mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Start At</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                    <tr>
+                        <td>{{ appointment.client.firstName }} {{ appointment.client.lastName }}</td>
+                        <td>{{ appointment.startAt|date('Y-m-d H:i') }}</td>
+                        <td>
+                            <form method="post" action="{{ path('therapist_appointment_update_status', {'id': appointment.id}) }}" class="status-form">
+                                <select name="status" class="form-select form-select-sm">
+                                    <option value="scheduled" {{ appointment.status == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                                    <option value="in_progress" {{ appointment.status == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                                    <option value="completed" {{ appointment.status == 'completed' ? 'selected' : '' }}>Completed</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-success">Confirm</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center py-4">No appointments found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

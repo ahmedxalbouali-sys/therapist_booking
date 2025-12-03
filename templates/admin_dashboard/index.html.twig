@@ -4,43 +4,145 @@
 
 {% block stylesheets %}
 <style>
+    body {
+        background-color: #f5f7fa;
+        font-family: 'Inter', sans-serif;
+    }
+
     .dashboard-container {
         display: flex;
         flex-direction: column;
         align-items: center;
         padding: 3rem 1rem;
+        width: 100%;
     }
+
+    h1 {
+        font-weight: 700;
+        font-size: 2.2rem;
+        color: #222;
+        margin-bottom: 0.25rem;
+    }
+
+    p.text-muted {
+        font-size: 0.95rem;
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    /* --- Dashboard cards --- */
     .dashboard-cards {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
         gap: 1.5rem;
-        margin-top: 2rem;
+        width: 100%;
+        max-width: 1200px;
     }
+
     .dashboard-card {
-        background-color: #ffffff;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        background: linear-gradient(145deg, #ffffff, #e3e7f1);
+        border-radius: 1.2rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         padding: 2rem 1.5rem;
         width: 220px;
         text-align: center;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        color: #222;
         text-decoration: none;
-        color: inherit;
+        position: relative;
+        overflow: hidden;
     }
+
     .dashboard-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        background: linear-gradient(145deg, #e8f0ff, #ffffff);
     }
+
     .dashboard-card i {
-        font-size: 2rem;
+        font-size: 2.5rem;
         margin-bottom: 0.5rem;
         color: #0d6efd;
     }
+
     .dashboard-card span {
         display: block;
         margin-top: 0.5rem;
         font-weight: 600;
+        font-size: 1rem;
+    }
+
+    /* --- Statistics cards --- */
+    .stats-container {
+        margin-top: 3rem;
+        width: 100%;
+        max-width: 1200px;
+    }
+
+    .stats-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        justify-content: center;
+    }
+
+    .stats-card {
+        flex: 1 1 250px;
+        background: #ffffff;
+        border-radius: 1rem;
+        padding: 2rem 1.5rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+    }
+
+    .stats-card h5 {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stats-card h3 {
+        margin: 0.25rem 0 0;
+        font-size: 2rem;
+        color: #222;
+    }
+
+    .stats-card i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: #0d6efd;
+    }
+
+    .chart-card {
+        background: #f8f9fa;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: inset 0 0 15px rgba(0,0,0,0.03);
+    }
+
+    canvas {
+        max-width: 100%;
+        height: 250px;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-cards, .stats-row {
+            flex-direction: column;
+            align-items: center;
+        }
     }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -48,7 +150,7 @@
 
 {% block body %}
 <div class="dashboard-container">
-    <h1 class="mb-2">Admin Dashboard</h1>
+    <h1>Admin Dashboard</h1>
     <p class="text-muted">Welcome, <strong>{{ app.user.email }}</strong></p>
 
     <div class="dashboard-cards">
@@ -58,8 +160,93 @@
         </a>
         <a href="{{ path('admin_appointment_index') }}" class="dashboard-card">
             <i class="fas fa-calendar-check"></i>
-            <span>View Appointments</span>
+            <span>Manage Appointments</span>
+        </a>
+        <a href="{{ path('app_admin_user') }}" class="dashboard-card">
+            <i class="fas fa-users-cog"></i>
+            <span>Manage Users</span>
         </a>
     </div>
+
+    <div class="stats-container">
+        <div class="stats-row">
+            <div class="stats-card">
+                <i class="fas fa-calendar-alt"></i>
+                <h5>Total Appointments</h5>
+                <h3>{{ totalAppointments }}</h3>
+            </div>
+            <div class="stats-card">
+                <i class="fas fa-calendar-day" style="color:#ffc107"></i>
+                <h5>Appointments Today</h5>
+                <h3>{{ appointmentsToday }}</h3>
+            </div>
+            <div class="stats-card">
+                <i class="fas fa-clock" style="color:#dc3545"></i>
+                <h5>Pending Appointments</h5>
+                <h3>{{ pendingAppointments }}</h3>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stats-card chart-card">
+                <h5 class="mb-2">Appointments by Status</h5>
+                <canvas id="appointmentsStatusChart"></canvas>
+            </div>
+            <div class="stats-card chart-card">
+                <h5 class="mb-2">Appointments per Therapist</h5>
+                <canvas id="appointmentsPerTherapistChart"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Doughnut chart - Appointment Status
+    const ctxStatus = document.getElementById('appointmentsStatusChart').getContext('2d');
+    new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+            labels: {{ appointmentStatusLabels|json_encode|raw }},
+            datasets: [{
+                label: 'Appointments Status',
+                data: {{ appointmentStatusData|json_encode|raw }},
+                backgroundColor: ['#0d6efd', '#ffc107', '#198754'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 13 } } }
+            }
+        }
+    });
+
+    // Bar chart - Appointments per Therapist
+    const ctxTherapist = document.getElementById('appointmentsPerTherapistChart').getContext('2d');
+    new Chart(ctxTherapist, {
+        type: 'bar',
+        data: {
+            labels: {{ therapistLabels|json_encode|raw }},
+            datasets: [{
+                label: 'Appointments',
+                data: {{ appointmentsPerTherapist|json_encode|raw }},
+                backgroundColor: '#0d6efd',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, precision: 0, ticks: { stepSize: 1 } },
+                x: { ticks: { font: { size: 13 } } }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>
 {% endblock %}

@@ -4,13 +4,13 @@ namespace App\Form;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Security\Core\Encoder\UserPasswordHasherInterface;
 
 class UserType extends AbstractType
 {
@@ -23,17 +23,34 @@ class UserType extends AbstractType
             ->add('phone')
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'mapped' => false, // we will hash it manually
+                'mapped' => false,
                 'required' => false,
                 'first_options'  => ['label' => 'New Password'],
                 'second_options' => ['label' => 'Repeat Password'],
             ]);
+
+        // -------------------------------------
+        // SHOW ROLES FIELD ONLY IF ADMIN
+        // -------------------------------------
+        if ($options['is_admin']) {
+        $builder->add('roles', ChoiceType::class, [
+            'choices' => [
+                'User' => 'ROLE_USER',
+                'Therapist' => 'ROLE_THERAPIST',
+                'Admin' => 'ROLE_ADMIN',
+            ],
+            'multiple' => true,
+            'expanded' => true,
+            'label' => 'Roles',
+        ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'is_admin' => false,   // DEFAULT VALUE
         ]);
     }
 }

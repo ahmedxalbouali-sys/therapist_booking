@@ -174,27 +174,26 @@
                         {# Therapist-specific navigation: visible when ROLE_THERAPIST #}
                         {% if is_granted('ROLE_THERAPIST') %}
                             <li class="nav-item">
-                                {# Therapist's appointments list route name: adjust if your route differs #}
                                 <a class="nav-link {% if app.request.attributes.get('_route') starts with 'therapist_appointment_' %}active{% endif %}" href="{{ path('therapist_appointment_index') }}">My Appointments</a>
                             </li>
                             <li class="nav-item">
-                                {# Therapist account edit — reuse existing account page if appropriate #}
                                 <a class="nav-link {% if app.request.attributes.get('_route') == 'app_account_index' or app.request.attributes.get('_route') == 'therapist_account_edit' %}active{% endif %}" href="{{ path('app_account_index') }}">My Account</a>
                             </li>
-                            {# Optional: quick link to availability or schedule page if you add one #}
-                            {# <li class="nav-item"><a class="nav-link" href="{{ path('therapist_schedule') }}">Schedule</a></li> #}
                         {% endif %}
 
-                        {# Admin navigation remains the same #}
-                        {% if is_granted('ROLE_ADMIN') %}
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {% if app.request.attributes.get('_route') starts with 'admin_' %}active{% endif %}" href="#" id="adminMenu" data-bs-toggle="dropdown">Admin</a>
-                                <ul class="dropdown-menu" aria-labelledby="adminMenu">
-                                    <li><a class="dropdown-item" href="{{ path('admin_therapist_index') }}">Manage Therapists</a></li>
-                                    <li><a class="dropdown-item" href="{{ path('admin_appointment_index') }}">Manage Appointments</a></li>
-                                </ul>
-                            </li>
-                        {% endif %}
+                        {# Admin navigation #}
+{% if is_granted('ROLE_ADMIN') %}
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle {% if app.request.attributes.get('_route') starts with 'admin_' or app.request.attributes.get('_route') == 'app_admin_dashboard' %}active{% endif %}" href="#" id="adminMenu" data-bs-toggle="dropdown">Admin</a>
+        <ul class="dropdown-menu" aria-labelledby="adminMenu">
+            <li><a class="dropdown-item" href="{{ path('app_admin') }}">Dashboard</a></li>
+            <li><a class="dropdown-item" href="{{ path('admin_therapist_index') }}">Manage Therapists</a></li>
+            <li><a class="dropdown-item" href="{{ path('admin_appointment_index') }}">Manage Appointments</a></li>
+            <li><a class="dropdown-item" href="{{ path('app_admin_user') }}">Manage Users</a></li>
+        </ul>
+    </li>
+{% endif %}
+
                     </ul>
 
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">

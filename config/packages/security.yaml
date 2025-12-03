@@ -43,7 +43,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
 
-        - { path: ^/therapist, roles: ROLE_THERAPIST }
+        
 
         
         - { path: ^/therapists, roles: ROLE_USER }
@@ -51,7 +51,8 @@ security:
 
         # Admin access
         - { path: ^/admin, roles: ROLE_ADMIN }
-       
+
+        - { path: ^/therapist, roles: ROLE_THERAPIST }
 
         
         
