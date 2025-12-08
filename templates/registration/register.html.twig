@@ -1,0 +1,179 @@
+{# templates/registration/register.html.twig (replace your current registration template) #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Account | Therapist Booking{% endblock %}
+
+{% block body %}
+<style>
+    .auth-wrapper {
+        min-height: 90vh;
+        background: linear-gradient(135deg, #eef2f5, #f9fbfc);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 560px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2.25rem;
+        box-shadow: 0 8px 30px rgba(12, 23, 52, 0.06);
+    }
+
+    .auth-title {
+        color: #3e81e4ff;
+        font-weight: 700;
+        font-size: 1.6rem;
+    }
+
+    .auth-subtitle {
+        margin-top: -4px;
+        font-size: 0.92rem;
+        color: #6f7b8a;
+    }
+
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #000000ff;
+    }
+
+    .form-control-lg {
+        padding: 0.68rem 0.9rem;
+        border-radius: 10px;
+        border: 1.2px solid #d0d7e0;
+    }
+
+    .form-control-lg:focus {
+        border-color: #2a71dbff;
+        box-shadow: 0 0 0 3px rgba(38,75,130,0.08);
+    }
+
+    .submit-btn {
+        background: #5f96e9ff;
+        border: none;
+        border-radius: 10px;
+        padding: 0.85rem;
+        font-size: 1.02rem;
+        font-weight: 600;
+    }
+
+    .submit-btn:hover {
+        background: #0b6dffff;
+    }
+
+    .auth-link {
+        color: #3164b1ff;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .auth-link:hover {
+        text-decoration: underline;
+    }
+
+    .form-check-label {
+        margin-left: 6px;
+        font-size: 0.95rem;
+    }
+
+    /* Two-column layout for name fields on larger screens */
+    @media (min-width: 540px) {
+        .row-name > .col {
+            padding-left: .5rem;
+            padding-right: .5rem;
+        }
+    }
+</style>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+
+        <div class="text-center mb-3">
+            <h2 class="auth-title">Create Your Account</h2>
+            <p class="auth-subtitle">Start booking appointments with trusted therapists</p>
+        </div>
+
+        {{ form_start(registrationForm) }}
+
+        {# Global form errors #}
+        {% if form_errors(registrationForm) %}
+            <div class="alert alert-danger">
+                {{ form_errors(registrationForm) }}
+            </div>
+        {% endif %}
+
+        {# FIRST + LAST NAME (side-by-side on wide screens) #}
+        <div class="row row-name g-2 mb-3">
+            <div class="col-12 col-md-6">
+                {{ form_row(registrationForm.firstName, {
+                    label: 'First name',
+                    attr: { class: 'form-control form-control-lg', placeholder: 'First name' }
+                }) }}
+            </div>
+            <div class="col-12 col-md-6">
+                {{ form_row(registrationForm.lastName, {
+                    label: 'Last name',
+                    attr: { class: 'form-control form-control-lg', placeholder: 'Last name' }
+                }) }}
+            </div>
+        </div>
+
+        {# PHONE #}
+        <div class="mb-3">
+            {{ form_row(registrationForm.phone, {
+                label: 'Phone (optional)',
+                attr: { class: 'form-control form-control-lg', placeholder: '+1 555 555 555' }
+            }) }}
+        </div>
+
+        {# EMAIL #}
+        <div class="mb-3">
+            {{ form_row(registrationForm.email, {
+                label: 'Email Address',
+                attr: { class: 'form-control form-control-lg', placeholder: 'example@mail.com' }
+            }) }}
+        </div>
+
+        {# PASSWORD (keep using the existing repeated field) #}
+        <div class="mb-3">
+            {{ form_row(registrationForm.plainPassword, {
+                label: 'Password',
+                attr: { class: 'form-control form-control-lg', placeholder: 'Choose a secure password' }
+            }) }}
+        </div>
+
+        {# TERMS #}
+        <div class="mb-3">
+            <div class="form-check">
+                {{ form_widget(registrationForm.agreeTerms, { attr: { class: 'form-check-input' } }) }}
+                {{ form_label(registrationForm.agreeTerms, null, { label_attr: { class: 'form-check-label' } }) }}
+                {# Show field error inline if any #}
+                {% if registrationForm.agreeTerms.vars.errors|length > 0 %}
+                    <div class="invalid-feedback d-block">
+                        {{ registrationForm.agreeTerms.vars.errors|first.message }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Submit #}
+        <div class="d-grid mb-2">
+            <button type="submit" class="btn submit-btn">Create Account</button>
+        </div>
+
+        {{ form_end(registrationForm) }}
+
+        <div class="text-center mt-2">
+            <p class="text-muted" style="font-size:0.92rem;">
+                Already have an account?
+                <a href="{{ path('app_login') }}" class="auth-link">Sign in</a>
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

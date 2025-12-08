@@ -1,0 +1,161 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Appointment{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Page spacing */
+    .appointment-container {
+        max-width: 950px;
+        margin: auto;
+    }
+
+    /* Header */
+    .page-header {
+        font-weight: 700;
+        font-size: 2rem;
+        color: #1a1a1a;
+        text-align: center;
+        margin-bottom: 2.2rem;
+    }
+
+    /* Card */
+    .card-custom {
+        border-radius: 15px;
+        padding: 2.5rem;
+        background: #ffffff;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+        position: relative;
+        transition: 0.3s;
+    }
+
+    .card-custom:hover {
+        box-shadow: 0 10px 34px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Form Styling */
+    .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 1px solid #d4d4d4;
+        transition: all 0.25s ease;
+    }
+
+    .form-control:hover,
+    .form-select:hover {
+        border-color: #0d6efd;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, .25);
+    }
+
+    /* Buttons */
+    .btn-save {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        border: none;
+        padding: 0.7rem 1.4rem;
+        font-size: 1rem;
+        border-radius: 10px;
+        transition: 0.25s;
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(135deg, #0b5ed7, #094fab);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(13, 110, 253, .3);
+    }
+
+    .btn-back {
+        background-color: #6c757d;
+        border: none;
+        padding: 0.7rem 1.4rem;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: 0.25s;
+    }
+
+    .btn-back:hover {
+        background-color: #565e64;
+        transform: translateY(-2px);
+    }
+
+    /* Alerts */
+    .alert {
+        border-radius: 10px;
+        font-size: 0.95rem;
+    }
+
+    @media (max-width: 768px) {
+        .card-custom {
+            padding: 1.5rem;
+        }
+        .page-header {
+            font-size: 1.6rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="appointment-container py-5">
+
+    <h1 class="page-header">Edit Appointment</h1>
+
+    {# Flash Messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="card-custom">
+
+        {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+
+            <div class="row g-4">
+
+                {# Loop through fields #}
+                {% for child in form %}
+                    {# Make 'notes' full-width #}
+                    {% set col_class = child.vars.name == 'notes' ? 'col-12' : 'col-md-6' %}
+
+                    <div class="{{ col_class }}">
+                        {{ form_row(child, {
+                            label_attr: { class: 'form-label' },
+                            attr: { 
+                                class: ( 'choice' in child.vars.block_prefixes ? 'form-select' : 'form-control' )
+                            }
+                        }) }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <div class="mt-4 d-flex gap-3 flex-wrap justify-content-start">
+                <button type="submit" class="btn btn-save text-white">
+                    <i class="fas fa-save me-2"></i> Save Changes
+                </button>
+
+                <a href="{{ path('admin_appointment_index') }}" class="btn btn-back text-white">
+                    <i class="fas fa-arrow-left me-2"></i> Back
+                </a>
+            </div>
+
+        {{ form_end(form) }}
+    </div>
+
+</div>
+{% endblock %}

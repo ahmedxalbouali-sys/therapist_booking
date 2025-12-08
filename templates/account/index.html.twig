@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Account | Therapist Booking{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Floating label style */
+    .form-floating>.form-control {
+        border-radius: 0.5rem;
+        padding: 1rem 0.75rem 0.25rem 0.75rem;
+        height: auto;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .form-floating>.form-control:focus {
+        box-shadow: 0 2px 8px rgba(0,123,255,0.25);
+        border-color: #0d6efd;
+    }
+    .card-body legend {
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .btn-update {
+        font-size: 1.05rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+
+    <h1 class="mb-5 text-center">My Account</h1>
+
+    {# Flash messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="card shadow-lg mx-auto" style="max-width: 600px;">
+        <div class="card-body">
+
+            {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+
+            <fieldset class="border p-4 mb-4 rounded-3">
+                <legend class="float-none w-auto px-3 small text-muted">Personal Information</legend>
+                
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.firstName, {attr: {class: 'form-control'}}) }}
+                    {{ form_label(form.firstName) }}
+                </div>
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.lastName, {attr: {class: 'form-control'}}) }}
+                    {{ form_label(form.lastName) }}
+                </div>
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.email, {attr: {class: 'form-control'}}) }}
+                    {{ form_label(form.email) }}
+                </div>
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.phone, {attr: {class: 'form-control'}}) }}
+                    {{ form_label(form.phone) }}
+                </div>
+            </fieldset>
+
+            <fieldset class="border p-4 mb-4 rounded-3">
+                <legend class="float-none w-auto px-3 small text-muted">Change Password</legend>
+
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.plainPassword.first, {attr: {class: 'form-control'}}) }}
+                    {{ form_label(form.plainPassword.first, 'New Password') }}
+                </div>
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.plainPassword.second, {attr: {class: 'form-control'}}) }}
+                    {{ form_label(form.plainPassword.second, 'Confirm Password') }}
+                </div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 btn-update">
+                Update Account
+            </button>
+
+            {{ form_end(form) }}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

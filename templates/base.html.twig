@@ -1,17 +1,249 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
+        <title>{% block title %}Therapist Booking{% endblock %}</title>
+
+        {# Bootstrap #}
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+        <style>
+            /* Reset and base styles */
+            body {
+                padding-top: 5.5rem;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f9fafb;
+                color: #333;
+            }
+
+            h1, h2, h3, h4, h5 {
+                font-weight: 600;
+                color: #1f2937;
+            }
+
+            .navbar-brand {
+                font-weight: bold;
+                font-size: 1.5rem;
+                color: #0d6efd !important;
+            }
+
+            .nav-link.active {
+                font-weight: 600;
+                color: #0d6efd !important;
+            }
+
+            .nav-link {
+                transition: all 0.3s;
+            }
+
+            .nav-link:hover {
+                color: #0b5ed7 !important;
+            }
+
+            .btn-primary {
+                background-color: #0d6efd;
+                border-color: #0d6efd;
+                transition: background-color 0.3s, border-color 0.3s;
+            }
+
+            .btn-primary:hover {
+                background-color: #0b5ed7;
+                border-color: #0a58ca;
+            }
+
+            .btn-outline-secondary {
+                transition: all 0.3s;
+            }
+
+            .btn-outline-secondary:hover {
+                background-color: #6c757d;
+                color: #fff;
+            }
+
+            .footer {
+                background-color: #f1f3f5;
+                padding: 1.5rem 0;
+                margin-top: 4rem;
+                font-size: 0.9rem;
+                color: #6c757d;
+            }
+
+            .footer a {
+                color: #0d6efd;
+                text-decoration: none;
+            }
+
+            .footer a:hover {
+                text-decoration: underline;
+            }
+
+            .alert {
+                border-radius: 0.5rem;
+            }
+
+            main.container {
+                min-height: 70vh;
+            }
+
+            /* Cards, sections, and general spacing */
+            .card {
+                border-radius: 0.75rem;
+                box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.05);
+            }
+
+            .section-title {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 1.5rem;
+                text-align: center;
+                color: #1f2937;
+            }
+
+            .section-subtitle {
+                font-size: 1.125rem;
+                color: #6c757d;
+                margin-bottom: 2rem;
+                text-align: center;
+            }
+
+            .hero {
+                background: linear-gradient(to right, #e0f2fe, #f0fdf4);
+                padding: 6rem 1rem;
+                text-align: center;
+                border-radius: 0.75rem;
+                margin-bottom: 3rem;
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+
+            .hero p {
+                font-size: 1.25rem;
+                color: #374151;
+                margin-bottom: 2rem;
+            }
+
+            .hero .btn {
+                font-size: 1.1rem;
+                padding: 0.75rem 1.5rem;
+            }
+
+            @media (max-width: 768px) {
+                .hero h1 {
+                    font-size: 2.2rem;
+                }
+
+                .hero p {
+                    font-size: 1rem;
+                }
+            }
+        </style>
+
+        {% block stylesheets %}{% endblock %}
     </head>
+
     <body>
-        {% block body %}{% endblock %}
+        {# Navbar #}
+        <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+            <div class="container">
+                <a class="navbar-brand" href="{{ path('app_home') }}">Therapist Booking</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        {# Regular client (ROLE_USER) navigation #}
+                        {% if is_granted('ROLE_USER') and not is_granted('ROLE_THERAPIST') %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if app.request.attributes.get('_route') starts with 'app_appointment_' %}active{% endif %}" href="{{ path('app_appointment_index') }}">My Appointments</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if app.request.attributes.get('_route') == 'client_therapist_index' %}active{% endif %}" href="{{ path('client_therapist_index') }}">Therapists</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if app.request.attributes.get('_route') == 'app_account_index' %}active{% endif %}" href="{{ path('app_account_index') }}">My Account</a>
+                            </li>
+                        {% endif %}
+
+                        {# Therapist-specific navigation: visible when ROLE_THERAPIST #}
+                        {% if is_granted('ROLE_THERAPIST') %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if app.request.attributes.get('_route') starts with 'therapist_appointment_' %}active{% endif %}" href="{{ path('therapist_appointment_index') }}">My Appointments</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if app.request.attributes.get('_route') == 'app_account_index' or app.request.attributes.get('_route') == 'therapist_account_edit' %}active{% endif %}" href="{{ path('app_account_index') }}">My Account</a>
+                            </li>
+                        {% endif %}
+
+                        {# Admin navigation #}
+{% if is_granted('ROLE_ADMIN') %}
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle {% if app.request.attributes.get('_route') starts with 'admin_' or app.request.attributes.get('_route') == 'app_admin_dashboard' %}active{% endif %}" href="#" id="adminMenu" data-bs-toggle="dropdown">Admin</a>
+        <ul class="dropdown-menu" aria-labelledby="adminMenu">
+            <li><a class="dropdown-item" href="{{ path('app_admin') }}">Dashboard</a></li>
+            <li><a class="dropdown-item" href="{{ path('admin_therapist_index') }}">Manage Therapists</a></li>
+            <li><a class="dropdown-item" href="{{ path('admin_appointment_index') }}">Manage Appointments</a></li>
+            <li><a class="dropdown-item" href="{{ path('app_admin_user') }}">Manage Users</a></li>
+        </ul>
+    </li>
+{% endif %}
+
+                    </ul>
+
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        {% if app.user %}
+                            <li class="nav-item d-flex align-items-center me-2">
+                                <span class="me-2 text-muted-small" style="font-size:0.9rem;">{{ app.user.email }}</span>
+                            </li>
+                            <li class="nav-item">
+                                <form method="post" action="{{ path('app_logout') }}" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-secondary">Logout</button>
+                                </form>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="btn btn-primary" href="{{ path('app_login') }}">Login</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        {# Main content #}
+        <main class="container mt-4">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} mt-4">{{ message }}</div>
+                {% endfor %}
+            {% endfor %}
+
+            {% block body %}{% endblock %}
+        </main>
+
+        {# Footer #}
+        <footer class="footer text-center">
+            <div class="container">
+                <p>&copy; {{ "now"|date("Y") }} Therapist Booking. All rights reserved.</p>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <p><small>You are logged in as <strong>Administrator</strong>.</small></p>
+                {% elseif is_granted('ROLE_THERAPIST') %}
+                    <p><small>You are logged in as <strong>Therapist</strong>.</small></p>
+                {% elseif app.user %}
+                    <p><small>Logged in as <strong>{{ app.user.email }}</strong>.</small></p>
+                {% else %}
+                    <p><small><a href="{{ path('app_register') }}">Register</a> or <a href="{{ path('app_login') }}">Login</a>.</small></p>
+                {% endif %}
+            </div>
+        </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        {% block javascripts %}{% endblock %}
     </body>
 </html>

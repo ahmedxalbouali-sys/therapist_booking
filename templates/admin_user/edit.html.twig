@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit User | Therapist Booking{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Edit User: {{ user.email }}</h1>
+
+    {{ form_start(userForm) }}
+        <div class="mb-3">
+            {{ form_label(userForm.firstName) }}
+            {{ form_widget(userForm.firstName, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(userForm.firstName) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(userForm.lastName) }}
+            {{ form_widget(userForm.lastName, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(userForm.lastName) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(userForm.email) }}
+            {{ form_widget(userForm.email, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(userForm.email) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(userForm.phone) }}
+            {{ form_widget(userForm.phone, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(userForm.phone) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(userForm.plainPassword) }}
+            {{ form_widget(userForm.plainPassword, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(userForm.plainPassword) }}
+        </div>
+
+        {% if userForm.roles is defined %}
+            <div class="mb-3">
+                {{ form_label(userForm.roles) }}
+                {{ form_widget(userForm.roles) }}
+                {{ form_errors(userForm.roles) }}
+            </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{{ path('app_admin_user') }}" class="btn btn-secondary">Cancel</a>
+    {{ form_end(userForm) }}
+</div>
+{% endblock %}
