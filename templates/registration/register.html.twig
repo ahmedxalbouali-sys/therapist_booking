@@ -80,7 +80,6 @@
         font-size: 0.95rem;
     }
 
-    /* Two-column layout for name fields on larger screens */
     @media (min-width: 540px) {
         .row-name > .col {
             padding-left: .5rem;
@@ -99,14 +98,12 @@
 
         {{ form_start(registrationForm) }}
 
-        {# Global form errors #}
         {% if form_errors(registrationForm) %}
             <div class="alert alert-danger">
                 {{ form_errors(registrationForm) }}
             </div>
         {% endif %}
 
-        {# FIRST + LAST NAME (side-by-side on wide screens) #}
         <div class="row row-name g-2 mb-3">
             <div class="col-12 col-md-6">
                 {{ form_row(registrationForm.firstName, {
@@ -122,7 +119,6 @@
             </div>
         </div>
 
-        {# PHONE #}
         <div class="mb-3">
             {{ form_row(registrationForm.phone, {
                 label: 'Phone (optional)',
@@ -130,7 +126,6 @@
             }) }}
         </div>
 
-        {# EMAIL #}
         <div class="mb-3">
             {{ form_row(registrationForm.email, {
                 label: 'Email Address',
@@ -138,7 +133,6 @@
             }) }}
         </div>
 
-        {# PASSWORD (keep using the existing repeated field) #}
         <div class="mb-3">
             {{ form_row(registrationForm.plainPassword, {
                 label: 'Password',
@@ -146,12 +140,21 @@
             }) }}
         </div>
 
-        {# TERMS #}
         <div class="mb-3">
             <div class="form-check">
+
+                {# --- NEW LINK ADDED HERE BEFORE THE TERMS CHECKBOX --- #}
+                
+                {# ----------------------------------------------------- #}
+
                 {{ form_widget(registrationForm.agreeTerms, { attr: { class: 'form-check-input' } }) }}
                 {{ form_label(registrationForm.agreeTerms, null, { label_attr: { class: 'form-check-label' } }) }}
-                {# Show field error inline if any #}
+
+                <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" 
+                   style="font-size:0.9rem; font-weight:600; margin-right:8px;">
+                    Read Terms & Conditions
+                </a>
+
                 {% if registrationForm.agreeTerms.vars.errors|length > 0 %}
                     <div class="invalid-feedback d-block">
                         {{ registrationForm.agreeTerms.vars.errors|first.message }}
@@ -160,9 +163,43 @@
             </div>
         </div>
 
-        {# Submit #}
         <div class="d-grid mb-2">
             <button type="submit" class="btn submit-btn">Create Account</button>
+        </div>
+
+        {# -------------------------------------------------------------- #}
+        {# Terms Modal (Bootstrap)                                        #}
+        {# -------------------------------------------------------------- #}
+        <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 12px;">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Terms & Conditions</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" style="max-height: 60vh; overflow-y:auto;">
+                        <p>
+                            Here you can place your Terms and Conditions text.
+                            You can make this as long as you want — privacy policy,
+                            user obligations, booking rules, cancellation policy, etc.
+                        </p>
+
+                        <p>
+                            Example placeholder text:  
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Vestibulum euismod, nisi vel convallis fringilla, sapien
+                            libero porttitor lorem, sit amet consequat orci nunc non elit.
+                        </p>
+
+                        <p>
+                            Add more sections as needed…
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{ form_end(registrationForm) }}
