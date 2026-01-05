@@ -42,25 +42,19 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+# Deny therapists from /appointment and /therapists
+    - { path: ^/appointment, allow_if: "not is_granted('ROLE_THERAPIST')" }
+    - { path: ^/therapists, allow_if: "not is_granted('ROLE_THERAPIST')" }
 
-        
+    # Allow users to access these pages
+    - { path: ^/appointment, roles: ROLE_USER }
+    - { path: ^/therapists, roles: ROLE_USER }
 
-        
-        - { path: ^/therapists, roles: ROLE_USER }
-        - { path: ^/appointment, roles: ROLE_USER }
+    # Admin access
+    - { path: ^/admin, roles: ROLE_ADMIN }
 
-        # Admin access
-        - { path: ^/admin, roles: ROLE_ADMIN }
-
-        - { path: ^/therapist, roles: ROLE_THERAPIST }
-
-        
-        
-        
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
-    
-
+    # Therapists can access /therapist section
+    - { path: ^/therapist, roles: ROLE_THERAPIST }
     
 when@test:
     security:
