@@ -60,51 +60,59 @@ public function show(Appointment $appointment): Response
         'appointment' => $appointment,
     ]);
 }
-
     #[Route('/new', name: 'app_appointment_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, AppointmentRepository $appointmentRepository): Response
-    {
-        $appointment = new Appointment();
-        $appointment->setClient($this->getUser());
+public function new(Request $request, EntityManagerInterface $entityManager, AppointmentRepository $appointmentRepository): Response
+{
+    $appointment = new Appointment();
+    $appointment->setClient($this->getUser());
 
-        $form = $this->createForm(AppointmentType::class, $appointment, [
-            'is_admin' => false,
-            'current_user' => $this->getUser(),
-        ]);
+    $form = $this->createForm(AppointmentType::class, $appointment, [
+        'is_admin' => false,
+        'current_user' => $this->getUser(),
+    ]);
 
-        $form->handleRequest($request);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+    if ($form->isSubmitted() && $form->isValid()) {
 
-            $appointmentEnd = (clone $appointment->getStartAt())->modify('+1 hour');
+        // ------------------ New: prevent past booking ------------------
+        $now = new \DateTime();
+        if ($appointment->getStartAt() < $now) {
+            $this->addFlash('error', 'You cannot book an appointment in the past.');
+            return $this->redirectToRoute('app_appointment_new');
+        }
+        // ----------------------------------------------------------------
 
-            $existing = $appointmentRepository->createQueryBuilder('a')
-                ->where('a.therapist = :therapist')
-                ->andWhere('a.startAt < :newEnd')
-                ->andWhere('DATE_ADD(a.startAt, 1, \'hour\') > :newStart')
-                ->setParameter('therapist', $appointment->getTherapist())
-                ->setParameter('newStart', $appointment->getStartAt())
-                ->setParameter('newEnd', $appointmentEnd)
-                ->getQuery()
-                ->getOneOrNullResult();
+        $appointmentEnd = (clone $appointment->getStartAt())->modify('+1 hour');
 
-            if ($existing) {
-                $this->addFlash('error', 'This therapist is already booked at this time. Please choose another slot.');
-                return $this->redirectToRoute('app_appointment_new');
-            }
+        $existing = $appointmentRepository->createQueryBuilder('a')
+            ->where('a.therapist = :therapist')
+            ->andWhere('a.startAt < :newEnd')
+            ->andWhere('DATE_ADD(a.startAt, 1, \'hour\') > :newStart')
+            ->setParameter('therapist', $appointment->getTherapist())
+            ->setParameter('newStart', $appointment->getStartAt())
+            ->setParameter('newEnd', $appointmentEnd)
+            ->getQuery()
+            ->getOneOrNullResult();
 
-            $entityManager->persist($appointment);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Your appointment has been booked successfully.');
-            return $this->redirectToRoute('app_appointment_index', [], Response::HTTP_SEE_OTHER);
+        if ($existing) {
+            $this->addFlash('error', 'This therapist is already booked at this time. Please choose another slot.');
+            return $this->redirectToRoute('app_appointment_new');
         }
 
-        return $this->render('appointment/new.html.twig', [
-            'appointment' => $appointment,
-            'form' => $form,
-        ]);
+        $entityManager->persist($appointment);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Your appointment has been booked successfully.');
+        return $this->redirectToRoute('app_appointment_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    return $this->render('appointment/new.html.twig', [
+        'appointment' => $appointment,
+        'form' => $form,
+    ]);
+}
+
 
     #[Route('/{id}/edit', name: 'app_appointment_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Appointment $appointment, EntityManagerInterface $entityManager, AppointmentRepository $appointmentRepository): Response

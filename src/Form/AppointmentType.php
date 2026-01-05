@@ -16,6 +16,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 
 class AppointmentType extends AbstractType
 {
@@ -33,6 +34,12 @@ class AppointmentType extends AbstractType
             ->add('startAt', DateTimeType::class, [
                 'widget' => 'single_text',
                 'disabled' => $options['is_therapist'], // Disable if therapist editing
+                'constraints' => [
+                    new GreaterThanOrEqual([
+                        'value' => new \DateTime('now'),
+                        'message' => 'You cannot book an appointment in the past.',
+                    ]),
+                ],
             ])
             ->add('notes', TextareaType::class, [
                 'required' => false,
